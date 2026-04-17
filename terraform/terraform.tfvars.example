@@ -1,0 +1,4 @@
+credentials_path = "your-credentials_path"
+project_id    = "your-gcp-project-id"
+bucket_name   = "your-unique-bucket-name"
+bq_dataset_id = "frontend_jobs"
