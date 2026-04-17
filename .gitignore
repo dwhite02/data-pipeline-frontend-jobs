@@ -63,3 +63,5 @@ terraform/terraform.tfvars
 
 # macOS
 .DS_Store
+
+.cursor/
