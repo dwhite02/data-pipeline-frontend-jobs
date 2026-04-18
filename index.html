@@ -1,0 +1,3310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Job Market Pipeline — Capstone Guide</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #141720;
+            --surface2: #1c2030;
+            --border: #2a2f42;
+            --accent: #4f8ef7;
+            --accent2: #7c5cfc;
+            --green: #3dd68c;
+            --yellow: #f5c842;
+            --red: #f76f6f;
+            --orange: #f79c4f;
+            --text: #e8eaf0;
+            --muted: #7b82a0;
+            --code-bg: #0a0c10;
+            --tag-bg: #1e2540
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh
+        }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 0 0 40px 0;
+            scrollbar-width: thin
+        }
+
+        .sidebar-logo {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px
+        }
+
+        .sidebar-logo .pn {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--accent);
+            letter-spacing: .05em;
+            text-transform: uppercase
+        }
+
+        .sidebar-logo .sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+            font-family: 'IBM Plex Mono', monospace
+        }
+
+        .deadline-badge {
+            margin: 0 16px 16px;
+            background: linear-gradient(135deg, #3a1a1a, #2a1010);
+            border: 1px solid #f76f6f44;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px
+        }
+
+        .deadline-badge .dl {
+            color: var(--red);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em
+        }
+
+        .nsl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 12px 20px 6px
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px 20px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            transition: all .15s;
+            cursor: pointer
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+            background: var(--surface2);
+            border-left-color: var(--border)
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: #4f8ef711
+        }
+
+        .nav-item .pn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 1px
+        }
+
+        .nav-sub {
+            padding: 5px 20px 5px 32px;
+            font-size: 12px;
+            color: var(--muted);
+            display: block;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color .15s
+        }
+
+        .nav-sub:hover {
+            color: var(--text)
+        }
+
+        .main {
+            flex: 1;
+            max-width: 880px;
+            padding: 48px 56px;
+            overflow-x: hidden
+        }
+
+        .hero {
+            margin-bottom: 48px;
+            padding-bottom: 36px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .hero-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            margin-bottom: 12px
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #e8eaf0 0%, #4f8ef7 60%, #7c5cfc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 15px;
+            max-width: 600px;
+            line-height: 1.8
+        }
+
+        .stack-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px
+        }
+
+        .stack-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 4px
+        }
+
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0
+        }
+
+        .pipe-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px
+        }
+
+        .pipe-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border)
+        }
+
+        .pipe-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            text-align: center;
+            white-space: nowrap
+        }
+
+        .pipe-arrow {
+            color: var(--border);
+            font-size: 18px;
+            margin: 0 8px;
+            padding-bottom: 16px
+        }
+
+        .rubric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0
+        }
+
+        .rubric-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px
+        }
+
+        .rubric-item .rl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 4px
+        }
+
+        .rubric-item .rt {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px
+        }
+
+        .rubric-item .rp {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--green)
+        }
+
+        .phase {
+            margin-bottom: 68px
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .phase-num-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+            margin-top: 6px
+        }
+
+        .phase-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2
+        }
+
+        .phase-header .pd {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 6px
+        }
+
+        .phase-header .te {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--yellow);
+            margin-top: 4px
+        }
+
+        .step {
+            margin-bottom: 34px
+        }
+
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .step-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--accent2);
+            background: #7c5cfc18;
+            border: 1px solid #7c5cfc44;
+            padding: 2px 8px;
+            border-radius: 4px
+        }
+
+        .step p {
+            color: var(--muted);
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.8
+        }
+
+        .step p strong {
+            color: var(--text);
+            font-weight: 500
+        }
+
+        .sidenote {
+            background: linear-gradient(135deg, #1a2040, #141e38);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 14px 18px;
+            margin: 14px 0;
+            font-size: 13px;
+            color: #a8b4d0
+        }
+
+        .sidenote .nl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: 5px
+        }
+
+        .sidenote.warning {
+            background: linear-gradient(135deg, #2a1f10, #231808);
+            border-left-color: var(--yellow)
+        }
+
+        .sidenote.warning .nl {
+            color: var(--yellow)
+        }
+
+        .sidenote.success {
+            background: linear-gradient(135deg, #0f2a1e, #0a1f16);
+            border-left-color: var(--green)
+        }
+
+        .sidenote.success .nl {
+            color: var(--green)
+        }
+
+        .sidenote.tip {
+            background: linear-gradient(135deg, #1e1040, #160c30);
+            border-left-color: var(--accent2)
+        }
+
+        .sidenote.tip .nl {
+            color: var(--accent2)
+        }
+
+        .skip-box {
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .skip-box strong {
+            color: var(--green)
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+            overflow-x: auto;
+            margin: 12px 0;
+            position: relative
+        }
+
+        pre code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.75;
+            color: #c8d0e8
+        }
+
+        .code-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 4px;
+            display: block
+        }
+
+        code:not(pre code) {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            background: var(--tag-bg);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: var(--accent)
+        }
+
+        .file-tree {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 2;
+            color: #c8d0e8;
+            margin: 12px 0
+        }
+
+        .file-tree .dir {
+            color: var(--accent)
+        }
+
+        .file-tree .comment {
+            color: #3d4560
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 14px 0
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .checklist li:last-child {
+            border-bottom: none
+        }
+
+        .check-box {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-top: 2px;
+            background: var(--surface2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all .2s
+        }
+
+        .check-box:hover {
+            border-color: var(--accent)
+        }
+
+        .check-box.done {
+            background: var(--green);
+            border-color: var(--green);
+            color: #000
+        }
+
+        .code-wrap {
+            position: relative
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all .2s;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: .06em
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent)
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+            color: var(--bg);
+            border-color: var(--green)
+        }
+
+        .kw {
+            color: #7c5cfc
+        }
+
+        .str {
+            color: #3dd68c
+        }
+
+        .cmt {
+            color: #3d4560;
+            font-style: italic
+        }
+
+        .fn {
+            color: #4f8ef7
+        }
+
+        .num {
+            color: #f5c842
+        }
+
+        .attr {
+            color: #4f8ef7
+        }
+
+        .val {
+            color: #3dd68c
+        }
+
+        .dataset-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0
+        }
+
+        .dataset-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px
+        }
+
+        .dataset-card .dsn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            margin-bottom: 4px
+        }
+
+        .dataset-card .dsd {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6
+        }
+
+        .questions-block {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0
+        }
+
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 14px
+        }
+
+        .question-card .qn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent);
+            opacity: .4;
+            min-width: 28px
+        }
+
+        .question-card .qt {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+            margin-bottom: 4px
+        }
+
+        .question-card .qnote {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 20px 0 10px
+        }
+
+        ul,
+        ol {
+            padding-left: 20px;
+            margin: 10px 0
+        }
+
+        ul li,
+        ol li {
+            color: var(--muted);
+            font-size: 14px;
+            padding: 3px 0;
+            line-height: 1.7
+        }
+
+        ul li strong,
+        ol li strong {
+            color: var(--text)
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px
+        }
+
+        @media(max-width:900px) {
+            .sidebar {
+                display: none
+            }
+
+            .main {
+                padding: 32px 24px
+            }
+
+            .rubric-grid {
+                grid-template-columns: 1fr
+            }
+
+            .dataset-cards {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-logo">
+                <div class="pn">FE Jobs Pipeline</div>
+                <div class="sub">DE Zoomcamp 2026 · Capstone</div>
+            </div>
+            <div class="deadline-badge">
+                <div class="dl">&#9889; Deadline</div>
+                <div style="color:var(--text);margin-top:2px">April 20, 2026</div>
+            </div>
+            <div class="nsl">Overview</div>
+            <a class="nav-item" onclick="goTo('overview')"><span class="pn">Intro</span>Project Overview</a>
+            <a class="nav-item" onclick="goTo('rubric')"><span class="pn">Scoring</span>Rubric &amp; Stack</a>
+            <div class="nsl">Phases</div>
+            <a class="nav-item" onclick="goTo('phase0')"><span class="pn">Phase 0</span>Setup &amp; Prerequisites</a>
+            <a class="nav-sub" onclick="goTo('p0-gcp')">&#8594; GCP Project</a>
+            <a class="nav-sub" onclick="goTo('p0-repo')">&#8594; GitHub Repo</a>
+            <a class="nav-sub" onclick="goTo('p0-kaggle')">&#8594; Kaggle API</a>
+            <a class="nav-sub" onclick="goTo('p0-tools')">&#8594; Local Tools</a>
+            <a class="nav-item" onclick="goTo('phase1')"><span class="pn">Phase 1</span>Infrastructure (Terraform)</a>
+            <a class="nav-sub" onclick="goTo('p1-sa')">&#8594; Service Account</a>
+            <a class="nav-sub" onclick="goTo('p1-tf')">&#8594; Terraform Config</a>
+            <a class="nav-sub" onclick="goTo('p1-apply')">&#8594; Apply &amp; Verify</a>
+            <a class="nav-item" onclick="goTo('phase2')"><span class="pn">Phase 2</span>Data Ingestion (Kestra)</a>
+            <a class="nav-sub" onclick="goTo('p2-kestra')">&#8594; Start Kestra</a>
+            <a class="nav-sub" onclick="goTo('p2-creds')">&#8594; GCP Credentials</a>
+            <a class="nav-sub" onclick="goTo('p2-flows')">&#8594; Pipeline Flows</a>
+            <a class="nav-item" onclick="goTo('phase3')"><span class="pn">Phase 3</span>Data Warehouse (BigQuery)</a>
+            <a class="nav-sub" onclick="goTo('p3-verify')">&#8594; Verify Tables</a>
+            <a class="nav-sub" onclick="goTo('p3-partition')">&#8594; Partitioning Check</a>
+            <a class="nav-item" onclick="goTo('phase4')"><span class="pn">Phase 4</span>Transformations (dbt)</a>
+            <a class="nav-sub" onclick="goTo('p4-init')">&#8594; dbt Init</a>
+            <a class="nav-sub" onclick="goTo('p4-models')">&#8594; dbt Models</a>
+            <a class="nav-sub" onclick="goTo('p4-run')">&#8594; Run &amp; Test</a>
+            <a class="nav-item" onclick="goTo('phase5')"><span class="pn">Phase 5</span>Dashboard (Looker Studio)</a>
+            <a class="nav-item" onclick="goTo('phase6')"><span class="pn">Phase 6</span>README &amp; Submission</a>
+            <a class="nav-item" onclick="goTo('best-practices')"><span class="pn">Ref</span>Best Practices Sources</a>
+        </nav>
+
+        <main class="main">
+
+            <!-- HERO -->
+            <section class="hero" id="overview">
+                <div class="hero-eyebrow">DE Zoomcamp 2026 &middot; Capstone Project Guide</div>
+                <h1>Frontend Job Market<br>Pipeline</h1>
+                <p>A complete, phase-by-phase walkthrough to build your end-to-end data pipeline analyzing the frontend
+                    engineering job market using 2023&ndash;2024 LinkedIn data. Every step explains <em>why</em>
+                    you&rsquo;re doing it &mdash; not just what to type.</p>
+                <div class="stack-row">
+                    <span class="stack-tag">Terraform</span><span class="stack-tag">GCP</span><span
+                        class="stack-tag">Kestra</span><span class="stack-tag">BigQuery</span><span
+                        class="stack-tag">dbt Core</span><span class="stack-tag">Looker Studio</span><span
+                        class="stack-tag">macOS</span>
+                </div>
+                <div class="pipeline-flow">
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#128193;</div>
+                        <div class="pipe-label">Kaggle<br>Datasets</div>
+                    </div>
+                    <div class="pipe-arrow">&#8594;</div>
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#9881;&#65039;</div>
+                        <div class="pipe-label">Kestra<br>Orchestration</div>
+                    </div>
+                    <div class="pipe-arrow">&#8594;</div>
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#129511;</div>
+                        <div class="pipe-label">GCS<br>Data Lake</div>
+                    </div>
+                    <div class="pipe-arrow">&#8594;</div>
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#127959;&#65039;</div>
+                        <div class="pipe-label">BigQuery<br>Warehouse</div>
+                    </div>
+                    <div class="pipe-arrow">&#8594;</div>
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#128260;</div>
+                        <div class="pipe-label">dbt<br>Transform</div>
+                    </div>
+                    <div class="pipe-arrow">&#8594;</div>
+                    <div class="pipe-step">
+                        <div class="pipe-icon">&#128202;</div>
+                        <div class="pipe-label">Looker<br>Dashboard</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROJECT CONTEXT -->
+            <section class="phase" id="project-context">
+                <h3>What You&rsquo;re Building &amp; Why It Matters</h3>
+                <p style="color:var(--muted);font-size:14px;margin-bottom:16px">This answers a real question people in
+                    tech are actively debating right now. Your pipeline surfaces data-driven insights on the shifting
+                    frontend hiring landscape.</p>
+                <div class="questions-block">
+                    <div class="question-card">
+                        <div class="qn">01</div>
+                        <div>
+                            <div class="qt">Is the share of entry-level frontend roles underrepresented in current job
+                                postings?</div>
+                            <div class="qnote">Seniority distribution analysis across 2023&ndash;2024 LinkedIn postings.
+                                Cross-reference with Stack Overflow survey AI adoption data for developer sentiment
+                                context (GitHub Copilot mid-2022, ChatGPT late 2022).</div>
+                        </div>
+                    </div>
+                    <div class="question-card">
+                        <div class="qn">02</div>
+                        <div>
+                            <div class="qt">Are entry-level frontend postings requiring mid/senior-level skills &mdash;
+                                &ldquo;experience inflation&rdquo;?</div>
+                            <div class="qnote">Cross-reference job title seniority with required skills. Surface the
+                                mismatch between what a role is called and what it actually demands.</div>
+                        </div>
+                    </div>
+                    <div class="question-card">
+                        <div class="qn">03</div>
+                        <div>
+                            <div class="qt">Which companies show ghost posting patterns &mdash; high applicants,
+                                long-listed, never filled?</div>
+                            <div class="qnote">Proxy: applicant count vs. listing age. Flag postings with 100+
+                                applicants still listed after 60 days as potential ghost jobs.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenote">
+                    <div class="nl">&#128204; Problem Statement (copy this into your README)</div>
+                    The frontend engineering job market has faced significant debate around AI impact and declining
+                    entry-level opportunities. This project builds an end-to-end batch data pipeline analyzing 124,000+
+                    LinkedIn job postings from 2023&ndash;2024 &mdash; examining seniority distribution, experience
+                    inflation in entry-level roles, and ghost posting patterns &mdash; with Stack Overflow survey data
+                    providing AI adoption context. The goal is to surface data-driven insights into who is actually
+                    hiring frontend engineers and what they actually expect.
+                </div>
+                <h3>Your Three Datasets</h3>
+                <div class="dataset-cards">
+                    <div class="dataset-card">
+                        <div class="dsn">LinkedIn Job Postings 2023&ndash;2024</div>
+                        <div class="dsd">Kaggle:<br><code
+                                style="font-size:10px">arshkon/linkedin-job-postings</code><br><br>124K real job
+                            postings. Has seniority, applicant counts, views, skills, dates. Core dataset.<br><br>Main
+                            file: <code>postings.csv</code></div>
+                    </div>
+                    <div class="dataset-card">
+                        <div class="dsn">Stack Overflow Survey</div>
+                        <div class="dsd">Free annual CSV from <a href="https://survey.stackoverflow.co"
+                                target="_blank">survey.stackoverflow.co</a><br><br>AI tool adoption by year
+                            (2022&ndash;2024). Enrichment layer for Question 1.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RUBRIC -->
+            <section class="phase" id="rubric">
+                <div class="phase-header">
+                    <div>
+                        <div
+                            style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">
+                            Scoring Reference</div>
+                        <h2>Rubric &amp; How You Hit 32/32</h2>
+                        <div class="pd">Every graded category, what earns full points, and how your project covers it.
+                        </div>
+                    </div>
+                </div>
+                <div class="rubric-grid">
+                    <div class="rubric-item">
+                        <div class="rl">Category 1</div>
+                        <div class="rt">Problem Description</div>
+                        <div class="rp">4 pts &rarr; Clear README with problem context</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Use the problem statement
+                            above. Explain the datasets and questions answered.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 2</div>
+                        <div class="rt">Cloud + IaC</div>
+                        <div class="rp">4 pts &rarr; GCP provisioned with Terraform</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phase 1. GCS bucket +
+                            BigQuery dataset created via <code>terraform apply</code>.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 3</div>
+                        <div class="rt">Data Ingestion (Batch)</div>
+                        <div class="rp">4 pts &rarr; End-to-end DAG, uploads to data lake</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phase 2. Kestra multi-step
+                            flows: download &rarr; GCS &rarr; BigQuery.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 4</div>
+                        <div class="rt">Data Warehouse</div>
+                        <div class="rp">4 pts &rarr; Partitioned + clustered tables</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phases 3&ndash;4. Raw tables are flat (fast ingest). Partition + cluster live on <strong>dbt mart tables</strong> &mdash; that satisfies the rubric.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 5</div>
+                        <div class="rt">Transformations</div>
+                        <div class="rp">4 pts &rarr; dbt models, raw &rarr; analytics</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phase 4. Staging &rarr;
+                            intermediate &rarr; mart models in dbt Core.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 6</div>
+                        <div class="rt">Dashboard</div>
+                        <div class="rp">4 pts &rarr; 2+ tiles (temporal + categorical)</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phase 5. 4&ndash;5 tiles
+                            in Looker Studio &mdash; exceeds the minimum.</div>
+                    </div>
+                    <div class="rubric-item">
+                        <div class="rl">Category 7</div>
+                        <div class="rt">Reproducibility</div>
+                        <div class="rp">4 pts &rarr; Anyone can clone + run from README</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">&#9989; Phase 6. README template
+                            covers all setup steps end to end.</div>
+                    </div>
+                    <div class="rubric-item"
+                        style="border-color:#f5c84244;background:linear-gradient(135deg,#1e1a08,#171408)">
+                        <div class="rl" style="color:var(--yellow)">Plagiarism Warning</div>
+                        <div class="rt">Do NOT copy other projects</div>
+                        <div class="rp" style="color:var(--red)">0 pts if violated</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px">This guide generates original code
+                            for your specific use case. Do not copy from the example projects shared earlier in
+                            planning.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 0 -->
+            <section class="phase" id="phase0">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 0</div>
+                    <div>
+                        <h2>Setup &amp; Prerequisites</h2>
+                        <div class="pd">Get everything installed and configured before writing a single line of pipeline
+                            code. Skipping this phase is the #1 cause of mid-build frustration.</div>
+                        <div class="te">&#9203; Estimated time: 1&ndash;2 hours</div>
+                    </div>
+                </div>
+
+                <div class="step" id="p0-gcp">
+                    <div class="step-title"><span class="step-num">0.1</span>GCP Project &mdash; Create or Reuse?</div>
+                    <p>You already have a GCP project from the course: <code>augmented-voice-486302-b4</code>. You have
+                        two options:</p>
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; Recommended: Create a New GCP Project</div>A clean dedicated project
+                        means your capstone is fully isolated &mdash; its own billing, its own resources, its own audit
+                        trail. An employer reviewing your repo sees infrastructure built from scratch, with no leftover
+                        course data mixed in. This is the professional approach.
+                    </div>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9889; Option B: Reuse Your Existing Project</div>Totally valid for speed. Use
+                        a different dataset name (e.g., <code>frontend_jobs</code>) and bucket name (e.g.,
+                        <code>fe-jobs-lake-yourname</code>) so nothing collides with your taxi data from the course.
+                    </div>
+                    <p><strong>If creating a new project:</strong></p>
+                    <ol>
+                        <li>Go to <a href="https://console.cloud.google.com"
+                                target="_blank">console.cloud.google.com</a></li>
+                        <li>Click the project dropdown at the top &rarr; <strong>New Project</strong></li>
+                        <li>Name it something clear: <code>fe-jobs-pipeline</code></li>
+                        <li>Note your Project ID (may differ from the display name)</li>
+                        <li>Go to <strong>Billing</strong> in the left menu and link a billing account</li>
+                    </ol>
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why billing must be enabled even for free usage</div>GCP's free tier
+                        is real &mdash; you won't be charged at this project's scale. BigQuery gives you 1TB of
+                        queries/month and 10GB storage free. But Terraform uses GCP APIs to create resources, and those
+                        APIs require billing to be enabled even when the actual cost is $0. Think of it as GCP needing a
+                        payment method on file before letting you provision anything.
+                    </div>
+                </div>
+
+                <div class="step" id="p0-repo">
+                    <div class="step-title"><span class="step-num">0.2</span>Create Your Capstone GitHub Repository
+                    </div>
+                    <p>Your capstone needs its own clean, public, dedicated repo &mdash; separate from
+                        <code>dataclub-zoomcamp-2026</code>.</p>
+                    <ol>
+                        <li>Go to <a href="https://github.com/new" target="_blank">github.com/new</a></li>
+                        <li>Name it: <code>frontend-jobs-pipeline</code></li>
+                        <li>Set to <strong>Public</strong> (required for peer review)</li>
+                        <li>Check <strong>Add a README file</strong></li>
+                    </ol>
+                    <span class="code-label">Terminal &mdash; clone and scaffold</span>
+                    <pre><code>git clone https://github.com/YOUR_USERNAME/frontend-jobs-pipeline.git
+cd frontend-jobs-pipeline
+mkdir -p terraform kestra/flows dbt/models/staging dbt/models/intermediate dbt/models/marts data</code></pre>
+                    <div class="file-tree">
+                        <span class="dir">frontend-jobs-pipeline/</span><br>
+                        &#9500;&#9472;&#9472; <span class="dir">terraform/</span> <span class="comment"># IaC &mdash;
+                            provisions GCS + BigQuery</span><br>
+                        &#9500;&#9472;&#9472; <span class="dir">kestra/flows/</span> <span class="comment"># YAML
+                            pipeline flows</span><br>
+                        &#9500;&#9472;&#9472; <span class="dir">dbt/models/</span><br>
+                        &#9474; &#9500;&#9472;&#9472; <span class="dir">staging/</span> <span class="comment"># raw
+                            &rarr; cleaned</span><br>
+                        &#9474; &#9500;&#9472;&#9472; <span class="dir">intermediate/</span> <span class="comment">#
+                            joining datasets</span><br>
+                        &#9474; &#9492;&#9472;&#9472; <span class="dir">marts/</span> <span class="comment"># final
+                            analytics tables</span><br>
+                        &#9500;&#9472;&#9472; <span class="dir">data/</span> <span class="comment"># local staging
+                            (gitignored)</span><br>
+                        &#9492;&#9472;&#9472; README.md
+                    </div>
+                    <span class="code-label">.gitignore &mdash; create this now, before anything else</span>
+                    <pre><code><span class="cmt"># Credentials &mdash; NEVER commit these</span>
+*.json
+.env
+service-account*.json
+gcp-creds*.json
+
+<span class="cmt"># Data files</span>
+data/
+*.csv
+*.parquet
+
+<span class="cmt"># dbt artifacts</span>
+dbt/target/
+dbt/.user.yml
+dbt/logs/
+
+<span class="cmt"># Terraform state (contains sensitive info)</span>
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/terraform.tfvars
+
+<span class="cmt"># Kestra secrets (contains base64-encoded credentials)</span>
+kestra/.env_encoded
+
+<span class="cmt"># macOS</span>
+.DS_Store</code></pre>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Never Commit Credentials</div>Your GCP service account JSON
+                        contains a private key. If committed to GitHub even briefly, bots scan public repos and can
+                        compromise your account within minutes. The <code>.gitignore</code> above prevents this. Always
+                        run <code>git status</code> before committing and check what's staged.
+                    </div>
+                </div>
+
+                <div class="step" id="p0-kaggle">
+                    <div class="step-title"><span class="step-num">0.3</span>Kaggle API Setup</div>
+                    <p>The LinkedIn dataset is too large to download manually. You'll use the Kaggle CLI &mdash; and
+                        this same setup is called from inside your Kestra pipeline for full reproducibility.</p>
+                    <p><strong>Step 1:</strong> Create a Kaggle account at <a href="https://kaggle.com"
+                            target="_blank">kaggle.com</a> if you don't have one.</p>
+                    <p><strong>Step 2:</strong> Generate a new API token (recommended as of Kaggle CLI &gt;= 1.8.0):</p>
+                    <ol>
+                        <li>Go to <a href="https://www.kaggle.com/settings" target="_blank">kaggle.com/settings</a>
+                            &rarr; <strong>API</strong> section</li>
+                        <li>Under <strong>API Tokens (Recommended)</strong>, click <strong>Generate New Token</strong>
+                        </li>
+                        <li>Give it a name (e.g. <code>fe-pipeline</code>) &rarr; click <strong>Create</strong></li>
+                        <li>Copy the token value shown &mdash; you only see it once</li>
+                    </ol>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; New token vs legacy kaggle.json</div>Kaggle now recommends API
+                        Tokens over the old <code>kaggle.json</code> file. The new token is used via the
+                        <code>KAGGLE_API_TOKEN</code> environment variable instead of a file at
+                        <code>~/.kaggle/kaggle.json</code>. The old approach still works but is considered legacy. For
+                        Kestra this is actually cleaner &mdash; you store one token string as a Secret instead of
+                        dealing with a JSON file inside a container.
+                    </div>
+                    <p><strong>Step 3:</strong> Install the CLI and test locally:</p>
+                    <span class="code-label">Terminal &mdash; install and verify</span>
+                    <pre><code><span class="cmt"># Must be >= 1.8.0 for new token support
+# On macOS use pip3 (not pip) — pip3 is the Python 3 package manager</span>
+pip3 install kaggle --upgrade
+
+<span class="cmt"># Set your token as an env variable (replace with your actual token value)</span>
+export KAGGLE_API_TOKEN="your_token_value_here"
+
+<span class="cmt"># Test it works &mdash; should return dataset results</span>
+kaggle datasets list -s "linkedin jobs"</code></pre>
+                    <p>For local persistence add <code>export KAGGLE_API_TOKEN="..."</code> to your
+                        <code>~/.zshrc</code>. In Kestra the token is stored as a single Secret (covered in Phase 2.2).
+                    </p>
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why the Kaggle CLI instead of manual download?</div>The dataset is
+                        ~500MB. Manual browser downloads are unreliable at that size and can't be automated. The CLI
+                        lets Kestra download the dataset programmatically as part of your orchestrated pipeline. Anyone
+                        cloning your repo just needs their own token and can run the full pipeline end to end &mdash;
+                        which directly supports your Reproducibility score.
+                    </div>
+                </div>
+
+                <div class="step" id="p0-tools">
+                    <div class="step-title"><span class="step-num">0.4</span>Verify &amp; Set Up Local Tools</div>
+
+                    <h3>Step 1 &mdash; Python via pyenv (do this first)</h3>
+                    <p>macOS ships with an old system Python you should never modify. The cleanest, most reliable way to
+                        manage Python on a Mac is <strong>pyenv</strong> &mdash; it sets a true global default that
+                        persists across every terminal session without PATH conflicts.</p>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Why not python.org installer or Homebrew Python directly?</div>
+                        The python.org installer and Homebrew Python both work but require manually editing
+                        <code>~/.zshrc</code> PATH entries that can get overridden by other tools. pyenv uses shell
+                        shims that always win — no PATH fights. It's the standard approach recommended by the pyenv docs
+                        and the broader macOS developer community.
+                    </div>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Which Python version to install?</div>
+                        Install <strong>Python 3.12</strong>. Per the official dbt docs, Python 3.13 has a warning flag
+                        (&#9888;) on the BigQuery adapter — not all dependencies support it yet. Python 3.12 is fully
+                        supported across dbt Core v1.8&ndash;v1.11 and all other tools in this project.
+                    </div>
+
+                    <span class="code-label">Terminal &mdash; install pyenv and Python 3.12</span>
+                    <pre><code><span class="cmt"># Step 1: Install Homebrew if you don't have it</span>
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+<span class="cmt"># Step 2: Install pyenv via Homebrew (recommended method per pyenv docs)</span>
+brew install pyenv
+
+<span class="cmt"># Step 3: Add pyenv to your shell — open ~/.zshrc and add these lines at the bottom</span>
+open ~/.zshrc</code></pre>
+
+                    <p>Add these three lines to the <strong>bottom</strong> of your <code>~/.zshrc</code> file:</p>
+                    <pre><code>export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv &gt;/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"</code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; The eval line is required &mdash; don't skip it</div>
+                        <code>eval "$(pyenv init -)"</code> activates pyenv's shell shims every time a terminal opens.
+                        Without this line pyenv installs Python fine but your terminal won't actually use it &mdash;
+                        it'll fall back to the system Python. This is the most common pyenv setup mistake.
+                    </div>
+
+                    <span class="code-label">Terminal &mdash; reload shell and install Python 3.12</span>
+                    <pre><code><span class="cmt"># Reload your shell config so pyenv activates immediately</span>
+source ~/.zshrc
+
+<span class="cmt"># Install Python 3.12 (fully supported by all tools in this project)</span>
+pyenv install 3.12
+
+<span class="cmt"># Set 3.12 as your global default for all terminals</span>
+pyenv global 3.12
+
+<span class="cmt"># Open a NEW terminal tab and verify it stuck</span>
+python3 --version   <span class="cmt"># should show Python 3.12.x</span>
+pip3 --version      <span class="cmt"># should show pip 24.x or 25.x from python 3.12</span></code></pre>
+
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; How to confirm pyenv is working correctly</div>
+                        Run <code>pyenv versions</code> — you should see an asterisk (*) next to 3.12 indicating it's
+                        the active global version. Run <code>which python3</code> — it should show a path containing
+                        <code>.pyenv/shims/</code>. If both of those look right, you're set.
+                    </div>
+
+                    <h3>Step 2 &mdash; Verify All Other Tools</h3>
+                    <span class="code-label">Terminal &mdash; check each tool</span>
+                    <pre><code>docker --version          <span class="cmt"># needed for Kestra — install Docker Desktop if missing</span>
+docker compose version    <span class="cmt"># should come with Docker Desktop</span>
+terraform --version       <span class="cmt"># needed for Phase 1 — install instructions below if missing</span>
+git --version             <span class="cmt"># should already be on your Mac</span></code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; If Terraform isn't installed</div>
+                        The official HashiCorp recommended method for macOS is their Homebrew tap:
+                        <pre style="margin-top:8px"><code>brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+terraform --version   <span class="cmt"># verify it installed</span></code></pre>
+                        Use the official <code>hashicorp/tap</code> — not the generic
+                        <code>brew install terraform</code> which may install an outdated community version.
+                    </div>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; If Docker Desktop isn't installed</div>
+                        Download it from <a href="https://www.docker.com/products/docker-desktop/"
+                            target="_blank">docker.com/products/docker-desktop</a>. After installing, open Docker
+                        Desktop and wait for it to finish starting (the whale icon in your menu bar stops animating)
+                        before running any <code>docker</code> commands.
+                    </div>
+
+                    <h3>Step 3 &mdash; Install Kaggle CLI and dbt</h3>
+                    <span class="code-label">Terminal</span>
+                    <pre><code><span class="cmt"># Kaggle CLI — must be >= 1.8.0 for KAGGLE_API_TOKEN auth to work</span>
+pip3 install kaggle --upgrade
+kaggle --version    <span class="cmt"># confirm it shows 1.8.0 or higher</span>
+
+<span class="cmt"># Test your token works (use your actual token value)</span>
+export KAGGLE_API_TOKEN="your_token_here"
+kaggle datasets list -s "linkedin jobs"
+
+<span class="cmt"># dbt Core v1.8+ requires installing dbt-core explicitly alongside the adapter</span>
+pip3 install "dbt-core>=1.9,<2.0" "dbt-bigquery>=1.9,<2.0"
+dbt --version       <span class="cmt"># should show dbt Core 1.9.x</span></code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Make KAGGLE_API_TOKEN persist across sessions</div>
+                        The <code>export</code> command only lasts for the current terminal session. To make it
+                        permanent, add it to your <code>~/.zshrc</code>:
+                        <pre style="margin-top:8px"><code>echo 'export KAGGLE_API_TOKEN="your_token_here"' >> ~/.zshrc
+source ~/.zshrc</code></pre>
+                        Replace <code>your_token_here</code> with your actual token value from kaggle.com/settings.
+                    </div>
+
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong>
+                            <code>python3 --version</code> shows 3.12.x, <code>pyenv versions</code> shows an asterisk
+                            next to 3.12, <code>kaggle --version</code> shows 1.8.0+, <code>docker --version</code>
+                            works, <code>terraform --version</code> works, and <code>dbt --version</code> works. Ready
+                            for Phase 1.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 1 -->
+            <section class="phase" id="phase1">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 1</div>
+                    <div>
+                        <h2>Infrastructure as Code (Terraform)</h2>
+                        <div class="pd">Provision your GCS data lake bucket and BigQuery dataset using Terraform. This
+                            earns the <strong>Cloud + IaC</strong> rubric category (4/4 points).</div>
+                        <div class="te">&#9203; Estimated time: 45 min &ndash; 1.5 hours</div>
+                    </div>
+                </div>
+                <div class="sidenote">
+                    <div class="nl">&#128161; Why Terraform instead of clicking in the GCP console?</div>You
+                    <em>could</em> create a GCS bucket by clicking around in the GCP UI. But that's not reproducible
+                    &mdash; someone cloning your repo would have to manually recreate every resource. Terraform lets you
+                    define infrastructure as code: one <code>terraform apply</code> command and everything is created
+                    identically every time. This is how real engineering teams manage cloud infrastructure at scale, and
+                    it's a specific rubric requirement worth 4 points.
+                </div>
+
+                <div class="step" id="p1-sa">
+                    <div class="step-title"><span class="step-num">1.1</span>Create a GCP Service Account</div>
+                    <p>A service account is like a robot user in GCP &mdash; it has its own credentials and permissions.
+                        This is the same concept you used in Module 2 when Kestra needed
+                        <code>{{secret('GCP_CREDS')}}</code> to talk to GCP.</p>
+                    <ol>
+                        <li>Go to <a href="https://console.cloud.google.com/iam-admin/serviceaccounts"
+                                target="_blank">GCP Console &rarr; IAM &amp; Admin &rarr; Service Accounts</a></li>
+                        <li>Click <strong>Create Service Account</strong></li>
+                        <li>Name: <code>fe-jobs-sa</code> &rarr; Click <strong>Create and Continue</strong></li>
+                        <li>Add these roles (one at a time using <strong>Add Role</strong>):
+                            <ul>
+                                <li><code>Storage Admin</code> &mdash; create/manage GCS buckets</li>
+                                <li><code>BigQuery Admin</code> &mdash; create/manage datasets and tables</li>
+                                <li><code>Viewer</code> &mdash; baseline read access</li>
+                            </ul>
+                        </li>
+                        <li>Click <strong>Continue</strong> &rarr; <strong>Done</strong></li>
+                        <li>Click on the service account &rarr; <strong>Keys</strong> tab &rarr; <strong>Add Key &rarr;
+                                Create new key &rarr; JSON</strong></li>
+                        <li>Save the downloaded file securely outside your repo</li>
+                    </ol>
+                    <span class="code-label">Terminal &mdash; move and secure the key</span>
+                    <pre><code>mkdir -p ~/.gcp
+mv ~/Downloads/your-key-file.json ~/.gcp/fe-jobs-sa.json
+chmod 600 ~/.gcp/fe-jobs-sa.json   <span class="cmt"># only you can read this file</span></code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Treat this file like a password</div>The JSON file contains a
+                        private key that grants full access to your GCP project. Do not put it in your repo, do not
+                        paste it in Slack or Discord, do not email it. You'll reference it by its file path in Terraform
+                        and by its contents as a secret in Kestra. The <code>.gitignore</code> from Phase 0 already
+                        blocks <code>*.json</code>.
+                    </div>
+                </div>
+
+                <div class="step" id="p1-tf">
+                    <div class="step-title"><span class="step-num">1.2</span>Write Your Terraform Configuration</div>
+                    <p>Create three files inside your <code>terraform/</code> folder.</p>
+                    <span class="code-label">terraform/variables.tf</span>
+                    <pre><code><span class="cmt"># Declaring variables here keeps main.tf clean and generic.
+# Anyone can reuse your infrastructure code with their own values.</span>
+<span class="kw">variable</span> <span class="str">"credentials_path"</span> {
+  description = <span class="str">"Path to GCP service account JSON key file"</span>
+  type        = string
+}
+<span class="kw">variable</span> <span class="str">"project_id"</span> {
+  description = <span class="str">"Your GCP Project ID"</span>
+  type        = string
+}
+<span class="kw">variable</span> <span class="str">"region"</span> {
+  description = <span class="str">"GCP region"</span>
+  type        = string
+  default     = <span class="str">"us-central1"</span>
+}
+<span class="kw">variable</span> <span class="str">"bucket_name"</span> {
+  description = <span class="str">"GCS bucket name &mdash; must be globally unique across all of GCP"</span>
+  type        = string
+}
+<span class="kw">variable</span> <span class="str">"bq_dataset_id"</span> {
+  description = <span class="str">"BigQuery dataset name"</span>
+  type        = string
+  default     = <span class="str">"frontend_jobs"</span>
+}</code></pre>
+
+                    <span class="code-label">terraform/main.tf</span>
+                    <pre><code><span class="cmt"># Tell Terraform we're using Google Cloud</span>
+<span class="kw">terraform</span> {
+  required_providers {
+    google = {
+      source  = <span class="str">"hashicorp/google"</span>
+      version = <span class="str">"~> 7.0"</span>
+    }
+  }
+}
+
+<span class="cmt"># Configure the provider — credentials path comes from terraform.tfvars</span>
+<span class="kw">provider</span> <span class="str">"google"</span> {
+  credentials = <span class="fn">file</span>(<span class="fn">var</span>.credentials_path)
+  project     = <span class="fn">var</span>.project_id
+  region      = <span class="fn">var</span>.region
+}
+
+<span class="cmt"># GCS bucket = your DATA LAKE
+# Raw files land here before being loaded into BigQuery</span>
+<span class="kw">resource</span> <span class="str">"google_storage_bucket"</span> <span class="str">"data_lake"</span> {
+  name          = <span class="fn">var</span>.bucket_name
+  location      = <span class="fn">upper</span>(<span class="fn">var</span>.region)
+  force_destroy = <span class="kw">true</span>
+
+  lifecycle_rule {
+    condition { age = <span class="num">30</span> }   <span class="cmt"># auto-delete raw files after 30 days (cost saving)</span>
+    action    { type = <span class="str">"Delete"</span> }
+  }
+  uniform_bucket_level_access = <span class="kw">true</span>
+}
+
+<span class="cmt"># BigQuery dataset = your DATA WAREHOUSE
+# Transformed, queryable tables live here</span>
+<span class="kw">resource</span> <span class="str">"google_bigquery_dataset"</span> <span class="str">"warehouse"</span> {
+  dataset_id                 = <span class="fn">var</span>.bq_dataset_id
+  location                   = <span class="fn">var</span>.region
+  delete_contents_on_destroy = <span class="kw">true</span>
+}
+
+<span class="cmt"># Output what was created so you can see it after terraform apply</span>
+<span class="kw">output</span> <span class="str">"gcs_bucket_name"</span> { value = <span class="fn">google_storage_bucket</span>.data_lake.name }
+<span class="kw">output</span> <span class="str">"bq_dataset"</span>      { value = <span class="fn">google_bigquery_dataset</span>.warehouse.dataset_id }</code></pre>
+
+                    <span class="code-label">terraform/terraform.tfvars (GITIGNORED &mdash; your actual values)</span>
+                    <pre><code>credentials_path = <span class="str">"~/.gcp/fe-jobs-sa.json"</span>
+project_id       = <span class="str">"YOUR-GCP-PROJECT-ID"</span>     <span class="cmt"># replace with your actual project ID</span>
+region           = <span class="str">"us-central1"</span>
+bucket_name      = <span class="str">"fe-jobs-lake-yourname"</span>  <span class="cmt"># must be globally unique &mdash; add your name/initials</span>
+bq_dataset_id    = <span class="str">"frontend_jobs"</span></code></pre>
+
+                    <p>Also create a <code>terraform.tfvars.example</code> with the same structure but placeholder
+                        values &mdash; this gets committed so anyone cloning the repo knows exactly what to fill in:</p>
+                    <span class="code-label">terraform/terraform.tfvars.example (COMMITTED)</span>
+                    <pre><code>credentials_path = <span class="str">"~/.gcp/your-service-account.json"</span>
+project_id       = <span class="str">"your-gcp-project-id"</span>
+region           = <span class="str">"us-central1"</span>
+bucket_name      = <span class="str">"your-unique-bucket-name"</span>
+bq_dataset_id    = <span class="str">"frontend_jobs"</span></code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Also create a terraform.tfvars.example</div>Since
+                        <code>terraform.tfvars</code> is gitignored, create a <code>terraform.tfvars.example</code> file
+                        with placeholder values and commit that instead. This shows reviewers the structure without
+                        exposing your real project ID:
+                        <pre style="margin-top:8px"><code>project_id    = "your-gcp-project-id"
+bucket_name   = "your-unique-bucket-name"
+bq_dataset_id = "frontend_jobs"</code></pre>
+                    </div>
+                </div>
+
+                <div class="step" id="p1-apply">
+                    <div class="step-title"><span class="step-num">1.3</span>Initialize and Apply Terraform</div>
+                    <span class="code-label">Terminal &mdash; from your terraform/ directory</span>
+                    <pre><code>cd terraform
+
+<span class="cmt"># Downloads the Google Cloud provider plugin (first-time setup)</span>
+terraform init
+
+<span class="cmt"># Preview exactly what will be created. No changes made yet.</span>
+terraform plan
+
+<span class="cmt"># Actually create the resources in GCP</span>
+terraform apply
+<span class="cmt"># Type "yes" when prompted</span></code></pre>
+                    <p>When complete you should see:</p>
+                    <pre><code>Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+Outputs:
+gcs_bucket_name = "fe-jobs-lake-yourname"
+bq_dataset = "frontend_jobs"</code></pre>
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; Verify in GCP Console</div>Go to <strong>Cloud Storage</strong> &mdash;
+                        your bucket should appear. Go to <strong>BigQuery</strong> &mdash; your
+                        <code>frontend_jobs</code> dataset should appear in the left panel. If both are there, Phase 1
+                        is complete.
+                    </div>
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong> GCS bucket and BigQuery
+                            dataset visible in GCP Console? Commit your <code>terraform/</code> folder (minus
+                            <code>.terraform/</code> and <code>terraform.tfvars</code>) to GitHub and move to Phase 2.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 2 -->
+            <section class="phase" id="phase2">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 2</div>
+                    <div>
+                        <h2>Data Ingestion &mdash; Kestra Pipeline</h2>
+                        <div class="pd">Build the orchestrated batch pipeline that downloads your three datasets,
+                            uploads them to GCS, and loads them into BigQuery raw tables. This earns the <strong>Data
+                                Ingestion</strong> rubric points (4/4).</div>
+                        <div class="te">&#9203; Estimated time: 3&ndash;5 hours</div>
+                    </div>
+                </div>
+                <div class="sidenote">
+                    <div class="nl">&#128161; You've done most of this before &mdash; here's the connection to Module 2
+                    </div>In Module 2, your flow <code>08_gcp_taxi.yaml</code> did exactly: (1) download a file, (2)
+                    upload to GCS using <code>io.kestra.plugin.gcp.gcs.Upload</code>, (3) create an external table, (4)
+                    load into BigQuery. Your capstone follows the exact same four-step pattern. The
+                    <code>pluginDefaults</code> block with <code>secret('GCP_CREDS')</code> works identically. The only
+                    difference is Kaggle downloads instead of wget, and job postings instead of taxi data.
+                </div>
+
+                <div class="step" id="p2-kestra">
+                    <div class="step-title"><span class="step-num">2.1</span>Start Kestra with Docker Compose</div>
+                    <p>The official Kestra docs recommend downloading their latest docker-compose directly rather than
+                        copying an older version. This ensures you get the current image tags and configuration
+                        structure:</p>
+                    <span class="code-label">Terminal &mdash; from your project root (not inside kestra/)</span>
+                    <pre><code><span class="cmt"># Make sure the kestra folder exists first</span>
+mkdir -p kestra kestra/flows
+
+<span class="cmt"># Download the official Kestra docker-compose into the kestra/ folder</span>
+curl -o kestra/docker-compose.yml   https://raw.githubusercontent.com/kestra-io/kestra/develop/docker-compose.yml
+
+<span class="cmt"># Verify it downloaded correctly</span>
+grep "image:" kestra/docker-compose.yml</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why download fresh instead of copying from Module 2?</div>
+                        The course docker-compose used <code>kestra/kestra:v1.1</code> which is now outdated. Kestra is
+                        currently on <code>v1.3.x</code>. The official Kestra docker-compose always reflects the current
+                        recommended setup including the right image tag, Postgres version, and configuration structure.
+                        Downloading it directly takes 5 seconds and avoids manually hunting for the right version
+                        number.
+                    </div>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Postgres version note</div>
+                        The official docker-compose uses <code>postgres:latest</code>. If you already have a Kestra
+                        Postgres database initialized on an older version and upgrade, you may see a compatibility
+                        error. If that happens, pin the postgres image to the version you initialized with (e.g.,
+                        <code>postgres:16</code>) in the docker-compose.yml.
+                    </div>
+
+                    <span class="code-label">Terminal &mdash; start Kestra</span>
+                    <pre><code><span class="cmt"># Move into the kestra/ folder — docker compose must run from here</span>
+cd kestra
+docker compose up -d
+docker compose ps  <span class="cmt"># verify all containers are running</span></code></pre>
+                    <p>Open <a href="http://localhost:8080" target="_blank">localhost:8080</a> and log in with
+                        <code>admin@kestra.io</code> / <code>Admin1234!</code> (from your existing docker-compose).</p>
+                    <div class="sidenote">
+                        <div class="nl">&#128161; What is Kestra actually doing here?</div>Kestra is your
+                        <strong>orchestrator</strong> &mdash; it coordinates each step of your pipeline in the correct
+                        order, handles failures gracefully, provides a UI to monitor runs, and makes the whole thing
+                        schedulable. Without orchestration you'd manually run scripts one by one. In production,
+                        companies use Kestra, Airflow, or Prefect to manage hundreds of these pipelines running on
+                        schedules. By using Kestra you're demonstrating industry-relevant skills beyond just writing
+                        scripts.
+                    </div>
+                </div>
+
+                <div class="step" id="p2-creds">
+                    <div class="step-title"><span class="step-num">2.2</span>Configure GCP Credentials in Kestra</div>
+                    <p>Same setup as Module 2 &mdash; KV pairs for config values, a Secret for the credential JSON.</p>
+                    <p><strong>Step 1:</strong> In the Kestra UI, go to <strong>Namespaces</strong> and create a
+                        namespace called <code>capstone</code>. Then create and execute this flow:</p>
+                    <span class="code-label">kestra/flows/01_setup_gcp_kv.yaml</span>
+                    <pre><code><span class="attr">id</span>: <span class="val">01_setup_gcp_kv</span>
+<span class="attr">namespace</span>: <span class="val">capstone</span>
+<span class="attr">tasks</span>:
+  - <span class="attr">id</span>: <span class="val">project_id</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.kv.Set</span>
+    <span class="attr">key</span>: <span class="val">GCP_PROJECT_ID</span>
+    <span class="attr">kvType</span>: <span class="val">STRING</span>
+    <span class="attr">value</span>: <span class="val">YOUR-PROJECT-ID</span>   <span class="cmt"># replace</span>
+  - <span class="attr">id</span>: <span class="val">location</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.kv.Set</span>
+    <span class="attr">key</span>: <span class="val">GCP_LOCATION</span>
+    <span class="attr">kvType</span>: <span class="val">STRING</span>
+    <span class="attr">value</span>: <span class="val">US-CENTRAL1</span>
+  - <span class="attr">id</span>: <span class="val">bucket</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.kv.Set</span>
+    <span class="attr">key</span>: <span class="val">GCP_BUCKET_NAME</span>
+    <span class="attr">kvType</span>: <span class="val">STRING</span>
+    <span class="attr">value</span>: <span class="val">fe-jobs-lake-yourname</span>  <span class="cmt"># must match your Terraform bucket name exactly</span>
+  - <span class="attr">id</span>: <span class="val">dataset</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.kv.Set</span>
+    <span class="attr">key</span>: <span class="val">GCP_DATASET</span>
+    <span class="attr">kvType</span>: <span class="val">STRING</span>
+    <span class="attr">value</span>: <span class="val">frontend_jobs</span></code></pre>
+                    <p>Paste this into a new flow in the Kestra UI (Flows &rarr; Create), save, then click
+                        <strong>Execute</strong>.</p>
+                    <p><strong>Step 2:</strong> Store your GCP credentials as a Kestra Secret. Per the official Kestra
+                        docs, the correct approach for Docker Compose is to base64-encode the JSON and store it in a
+                        <code>.env_encoded</code> file — Kestra reads this at startup and securely injects the secrets.
+                    </p>
+
+                    <span class="code-label">Terminal &mdash; run from your project root (not inside kestra/)</span>
+                    <pre><code><span class="cmt"># macOS uses -b 0 (not -w 0) to disable line wrapping on base64</span>
+echo "SECRET_GCP_CREDS=$(cat ~/.gcp/fe-jobs-sa.json | base64 -b 0)" >> kestra/.env_encoded
+
+<span class="cmt"># Add your Kaggle token (replace with your actual token value)</span>
+echo "SECRET_KAGGLE_API_TOKEN=$(echo -n 'your_actual_token_here' | base64)" >> kestra/.env_encoded
+
+<span class="cmt"># Verify the file was created</span>
+ls -la kestra/.env_encoded</code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; If you get "No such file or directory"</div>
+                        You are probably running the command from inside the <code>kestra/</code> folder. The path
+                        <code>kestra/.env_encoded</code> only works from the project root. Either <code>cd ..</code> to
+                        go back to the root, or drop the <code>kestra/</code> prefix and just use
+                        <code>.env_encoded</code> if you are already inside <code>kestra/</code>.
+                    </div>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Replace your_kaggle_token_here with your actual token</div>
+                        Your Kaggle API token is the value from kaggle.com/settings &rarr; API Tokens. The
+                        <code>echo -n</code> flag prevents a trailing newline from being included in the encoded value,
+                        which would corrupt the secret.
+                    </div>
+
+                    <p>Now edit <code>kestra/docker-compose.yml</code> to make two changes:</p>
+
+                    <p><strong>Edit 1 &mdash; Add <code>env_file</code></strong> under the kestra service, after the
+                        <code>volumes:</code> block. The official file doesn&rsquo;t have this line — you&rsquo;re
+                        adding it fresh:</p>
+                    <pre><code><span class="cmt"># Find this block in docker-compose.yml:</span>
+    volumes:
+      - kestra-data:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/kestra-wd:/tmp/kestra-wd
+
+<span class="cmt"># Add env_file directly below volumes (same indentation level):</span>
+    volumes:
+      - kestra-data:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/kestra-wd:/tmp/kestra-wd
+    env_file:
+      - .env_encoded</code></pre>
+
+                    <p><strong>Edit 2 &mdash; Uncomment basic auth</strong> so the Kestra UI requires a login. Find the
+                        commented-out section and uncomment it:</p>
+                    <pre><code><span class="cmt"># Find these commented lines:</span>
+          <span class="cmt"># server:</span>
+          <span class="cmt">#   basic-auth:</span>
+          <span class="cmt">#     username: admin@kestra.io</span>
+          <span class="cmt">#     password: Admin1234!</span>
+
+<span class="cmt"># Uncomment them so they look like this:</span>
+          server:
+            basic-auth:
+              username: admin@kestra.io
+              password: Admin1234!</code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; YAML indentation matters</div>
+                        YAML is whitespace-sensitive. When adding <code>env_file</code> make sure it aligns exactly with
+                        <code>volumes:</code> — both should be indented 4 spaces under the <code>kestra:</code> service.
+                        If indentation is off, Docker Compose will throw a parse error.
+                    </div>
+
+                    <p>Start Kestra:</p>
+                    <pre><code>cd kestra && docker compose up -d</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why base64 and not pasting JSON directly?</div>
+                        Kestra identifies secrets by scanning for environment variables prefixed with
+                        <code>SECRET_</code> and base64-decodes their values at runtime. This keeps raw credentials out
+                        of plain-text environment variables and process logs. The <code>SECRET_</code> prefix is
+                        stripped when you reference secrets in flows &mdash; so <code>SECRET_GCP_CREDS</code> is
+                        referenced as <code>&#123;&#123;secret('GCP_CREDS')&#125;&#125;</code> and
+                        <code>SECRET_KAGGLE_API_TOKEN</code> as
+                        <code>&#123;&#123;secret('KAGGLE_API_TOKEN')&#125;&#125;</code>.
+                    </div>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; KV Store vs Secrets &mdash; what's the difference?</div><strong>KV
+                            pairs</strong> are plain config values like project ID and bucket name. Fine to store in
+                        plain text, not sensitive.<br><br><strong>Secrets</strong> are encrypted. Your service account
+                        JSON contains a private key &mdash; Kestra encrypts it and never exposes it in logs. In your
+                        flows you reference it as <code>&#123;&#123;secret('GCP_CREDS')&#125;&#125;</code> and Kestra
+                        decrypts it at runtime. Identical to what you did in Module 2 with <code>06_gcp_kv.yaml</code>
+                        and <code>07_gcp_setup.yaml</code>.
+                    </div>
+                </div>
+
+                <div class="step" id="p2-flows">
+                    <div class="step-title"><span class="step-num">2.3</span>Build the Ingestion Pipeline Flows</div>
+                    <p>Three flows, one per dataset. Each follows: <strong>download &rarr; upload to GCS &rarr; load to
+                            BigQuery</strong>. Note: <code>.yml</code> and <code>.yaml</code> are both valid Kestra
+                        file extensions &mdash; the guide uses <code>.yaml</code> in prose but the repo files use
+                        <code>.yml</code>. Pick one and stay consistent.</p>
+
+                    <span class="code-label">kestra/flows/02_ingest_linkedin_2024.yaml</span>
+                    <pre><code><span class="attr">id</span>: <span class="val">02_ingest_linkedin_2024</span>
+<span class="attr">namespace</span>: <span class="val">capstone</span>
+<span class="attr">description</span>: <span class="val">Downloads 124K LinkedIn job postings from Kaggle, uploads to GCS, loads a flat raw BigQuery table (no partition/cluster &mdash; optimization lives in dbt mart models). Flow 03 chains automatically after SUCCESS.</span>
+
+<span class="attr">variables</span>:
+  <span class="attr">dataset_slug</span>: <span class="val">"arshkon/linkedin-job-postings"</span>
+  <span class="attr">gcs_prefix</span>: <span class="val">"gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"</span>
+
+<span class="attr">tasks</span>:
+  <span class="cmt"># WorkingDirectory shares filesystem between download and upload tasks</span>
+  - <span class="attr">id</span>: <span class="val">ingest</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.flow.WorkingDirectory</span>
+    <span class="attr">tasks</span>:
+      <span class="cmt"># STEP 1: Download postings.csv from Kaggle using -f flag (single file, ~500MB)</span>
+      - <span class="attr">id</span>: <span class="val">download_postings</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.shell.Commands</span>
+        <span class="attr">containerImage</span>: <span class="val">python:3.12-slim</span>
+        <span class="attr">taskRunner</span>:
+          <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.runner.docker.Docker</span>
+        <span class="attr">outputFiles</span>:
+          - <span class="val">"*.csv"</span>
+        <span class="attr">commands</span>:
+          - <span class="val">pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore</span>
+          - <span class="val">KAGGLE_API_TOKEN={{secret('KAGGLE_API_TOKEN')}} kaggle datasets download {{vars.dataset_slug}} -f postings.csv -p . --unzip</span>
+          - <span class="val">ls -lh *.csv</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT30S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+      <span class="cmt"># STEP 2: Upload postings.csv to GCS data lake</span>
+      - <span class="attr">id</span>: <span class="val">upload_postings</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
+        <span class="attr">from</span>: <span class="val">"{{outputs.download_postings.outputFiles['postings.csv']}}"</span>
+        <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}postings.csv"</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT10S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+  <span class="cmt"># STEP 3: Create external table pointing at GCS</span>
+  - <span class="attr">id</span>: <span class="val">create_external_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.linkedin_job_postings_ext`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}postings.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );</span>
+
+  <span class="cmt"># STEP 4: Load raw table — flat copy, no partition or cluster.
+  # Partitioning and clustering belong in dbt mart models where
+  # query patterns are known. Raw layer stays simple and fast to write.</span>
+  - <span class="attr">id</span>: <span class="val">load_raw_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_linkedin_job_postings`
+      AS SELECT * FROM
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.linkedin_job_postings_ext`;</span>
+
+  - <span class="attr">id</span>: <span class="val">purge_files</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles</span>
+
+<span class="cmt"># Annual schedule — Jan 1 at 6am PT. Dataset refreshes roughly yearly.
+# Flow trigger on 03 chains automatically after this succeeds.</span>
+<span class="attr">triggers</span>:
+  - <span class="attr">id</span>: <span class="val">annual_ingest</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.trigger.Schedule</span>
+    <span class="attr">cron</span>: <span class="val">"0 6 1 1 *"</span>
+    <span class="attr">timezone</span>: <span class="val">America/Los_Angeles</span>
+
+<span class="attr">pluginDefaults</span>:
+  - <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp</span>
+    <span class="attr">values</span>:
+      <span class="attr">serviceAccount</span>: <span class="val">"{{secret('GCP_CREDS')}}"</span>
+      <span class="attr">projectId</span>: <span class="val">"{{kv('GCP_PROJECT_ID')}}"</span>
+      <span class="attr">location</span>: <span class="val">"{{kv('GCP_LOCATION')}}"</span>
+      <span class="attr">bucket</span>: <span class="val">"{{kv('GCP_BUCKET_NAME')}}"</span></code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Verify CSV filenames before running</div>The filenames above
+                        (<code>postings.csv</code>, <code>job_skills.csv</code>) are based on the known LinkedIn dataset
+                        structure. When you first download the dataset, check what files were actually created by
+                        looking at the Kestra execution logs after the <code>download_dataset</code> step (it logs
+                        <code>ls -la *.csv</code>). If the filenames differ, update the <code>upload_*_to_gcs</code>
+                        task <code>from</code> fields accordingly.
+                    </div>
+
+                    <span class="code-label">kestra/flows/03_ingest_linkedin_supplementary.yaml</span>
+                    <pre><code><span class="attr">id</span>: <span class="val">03_ingest_linkedin_supplementary</span>
+<span class="attr">namespace</span>: <span class="val">capstone</span>
+<span class="attr">description</span>: <span class="val">Downloads supplementary LinkedIn files (job_skills, job_industries, companies). Triggered automatically after 02 succeeds so supplementary files always match the postings version.</span>
+
+<span class="attr">variables</span>:
+  <span class="attr">dataset_slug</span>: <span class="val">"arshkon/linkedin-job-postings"</span>
+  <span class="attr">gcs_prefix</span>: <span class="val">"gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"</span>
+
+<span class="attr">tasks</span>:
+  <span class="cmt"># WorkingDirectory shares filesystem so all three files are accessible to upload tasks</span>
+  - <span class="attr">id</span>: <span class="val">ingest_supplementary</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.flow.WorkingDirectory</span>
+    <span class="attr">tasks</span>:
+      <span class="cmt"># Download all three supplementary files in one Docker task</span>
+      - <span class="attr">id</span>: <span class="val">download_files</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.shell.Commands</span>
+        <span class="attr">containerImage</span>: <span class="val">python:3.12-slim</span>
+        <span class="attr">taskRunner</span>:
+          <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.runner.docker.Docker</span>
+        <span class="attr">outputFiles</span>:
+          - <span class="val">"*.csv"</span>
+        <span class="attr">commands</span>:
+          - <span class="val">pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore</span>
+          - <span class="val">KAGGLE_API_TOKEN={{secret('KAGGLE_API_TOKEN')}} kaggle datasets download {{vars.dataset_slug}} -f jobs/job_skills.csv -p . --unzip</span>
+          - <span class="val">KAGGLE_API_TOKEN={{secret('KAGGLE_API_TOKEN')}} kaggle datasets download {{vars.dataset_slug}} -f jobs/job_industries.csv -p . --unzip</span>
+          - <span class="val">KAGGLE_API_TOKEN={{secret('KAGGLE_API_TOKEN')}} kaggle datasets download {{vars.dataset_slug}} -f companies/companies.csv -p . --unzip</span>
+          - <span class="val">mv jobs/job_skills.csv . && mv jobs/job_industries.csv . && mv companies/companies.csv .</span>
+          - <span class="val">ls -la *.csv</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT30S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+      - <span class="attr">id</span>: <span class="val">upload_skills</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
+        <span class="attr">from</span>: <span class="val">"{{outputs.download_files.outputFiles['job_skills.csv']}}"</span>
+        <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}job_skills.csv"</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT10S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+      - <span class="attr">id</span>: <span class="val">upload_industries</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
+        <span class="attr">from</span>: <span class="val">"{{outputs.download_files.outputFiles['job_industries.csv']}}"</span>
+        <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}job_industries.csv"</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT10S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+      - <span class="attr">id</span>: <span class="val">upload_companies</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
+        <span class="attr">from</span>: <span class="val">"{{outputs.download_files.outputFiles['companies.csv']}}"</span>
+        <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}companies.csv"</span>
+        <span class="attr">retry</span>:
+          <span class="attr">type</span>: <span class="val">exponential</span>
+          <span class="attr">maxAttempts</span>: <span class="num">3</span>
+          <span class="attr">interval</span>: <span class="val">PT10S</span>
+          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+  - <span class="attr">id</span>: <span class="val">load_skills_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_job_skills`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}job_skills.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );</span>
+
+  - <span class="attr">id</span>: <span class="val">load_industries_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_job_industries`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}job_industries.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );</span>
+
+  - <span class="attr">id</span>: <span class="val">load_companies_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_companies`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}companies.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );</span>
+
+  - <span class="attr">id</span>: <span class="val">purge_files</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles</span>
+
+<span class="cmt"># Fires automatically when flow 02 completes successfully.
+# preconditions is the correct Kestra OSS syntax for Flow triggers.</span>
+<span class="attr">triggers</span>:
+  - <span class="attr">id</span>: <span class="val">after_linkedin_postings</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.trigger.Flow</span>
+    <span class="attr">preconditions</span>:
+      <span class="attr">id</span>: <span class="val">wait_for_postings</span>
+      <span class="attr">flows</span>:
+        - <span class="attr">namespace</span>: <span class="val">capstone</span>
+          <span class="attr">flowId</span>: <span class="val">02_ingest_linkedin_2024</span>
+          <span class="attr">states</span>: [<span class="val">SUCCESS</span>]
+
+<span class="attr">pluginDefaults</span>:
+  - <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp</span>
+    <span class="attr">values</span>:
+      <span class="attr">serviceAccount</span>: <span class="val">"{{secret('GCP_CREDS')}}"</span>
+      <span class="attr">projectId</span>: <span class="val">"{{kv('GCP_PROJECT_ID')}}"</span>
+      <span class="attr">location</span>: <span class="val">"{{kv('GCP_LOCATION')}}"</span>
+      <span class="attr">bucket</span>: <span class="val">"{{kv('GCP_BUCKET_NAME')}}"</span></code></pre>
+
+                    <span class="code-label">kestra/flows/04_ingest_stackoverflow_survey.yaml</span>
+                    <pre><code><span class="attr">id</span>: <span class="val">04_ingest_stackoverflow_survey</span>
+<span class="attr">namespace</span>: <span class="val">capstone</span>
+<span class="attr">description</span>: <span class="val">Downloads Stack Overflow Developer Survey for 2022, 2023, and 2024. ForEach loops over years — each iteration downloads the zip, extracts the CSV, and uploads to GCS. External wildcard table spans all three years.</span>
+
+<span class="attr">variables</span>:
+  <span class="attr">gcs_prefix</span>: <span class="val">"gs://{{kv('GCP_BUCKET_NAME')}}/raw/stackoverflow_survey/"</span>
+
+<span class="attr">tasks</span>:
+  <span class="cmt"># ForEach over years sequentially (concurrencyLimit: 1)
+  # Each iteration: HTTP download zip → unzip to CSV → upload to GCS</span>
+  - <span class="attr">id</span>: <span class="val">ingest_per_year</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.flow.ForEach</span>
+    <span class="attr">values</span>: [<span class="val">"2022"</span>, <span class="val">"2023"</span>, <span class="val">"2024"</span>]
+    <span class="attr">concurrencyLimit</span>: <span class="num">1</span>
+    <span class="attr">tasks</span>:
+      <span class="cmt"># WorkingDirectory shares filesystem within each year iteration.
+      # Tasks nested inside WorkingDirectory are one level deeper than ForEach,
+      # so use {{parent.taskrun.value}} not {{taskrun.value}} to get the year.
+      # Source: kestra.io/docs/workflow-components/tasks/taskruns</span>
+      - <span class="attr">id</span>: <span class="val">process_year</span>
+        <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.flow.WorkingDirectory</span>
+        <span class="attr">tasks</span>:
+          <span class="cmt"># HTTP Download — no auth needed, direct from survey.stackoverflow.co</span>
+          - <span class="attr">id</span>: <span class="val">download_zip</span>
+            <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.http.Download</span>
+            <span class="attr">uri</span>: <span class="val">"https://survey.stackoverflow.co/datasets/stack-overflow-developer-survey-{{parent.taskrun.value}}.zip"</span>
+            <span class="attr">retry</span>:
+              <span class="attr">type</span>: <span class="val">exponential</span>
+              <span class="attr">maxAttempts</span>: <span class="num">3</span>
+              <span class="attr">interval</span>: <span class="val">PT30S</span>
+              <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+          <span class="cmt"># Unzip and rename with year suffix so all three CSVs can coexist in GCS</span>
+          - <span class="attr">id</span>: <span class="val">extract_csv</span>
+            <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.shell.Commands</span>
+            <span class="attr">inputFiles</span>:
+              <span class="attr">survey.zip</span>: <span class="val">"{{outputs.download_zip.uri}}"</span>
+            <span class="attr">outputFiles</span>:
+              - <span class="val">"survey_*.csv"</span>
+            <span class="attr">commands</span>:
+              - <span class="val">unzip -p survey.zip survey_results_public.csv > survey_{{parent.taskrun.value}}.csv</span>
+              - <span class="val">echo "Rows: $(wc -l < survey_{{parent.taskrun.value}}.csv)"</span>
+
+          <span class="cmt"># Upload renamed CSV to GCS</span>
+          - <span class="attr">id</span>: <span class="val">upload_to_gcs</span>
+            <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
+            <span class="attr">from</span>: <span class="val">"{{outputs.extract_csv.outputFiles['survey_' ~ parent.taskrun.value ~ '.csv']}}"</span>
+            <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}survey_{{parent.taskrun.value}}.csv"</span>
+            <span class="attr">retry</span>:
+              <span class="attr">type</span>: <span class="val">exponential</span>
+              <span class="attr">maxAttempts</span>: <span class="num">3</span>
+              <span class="attr">interval</span>: <span class="val">PT10S</span>
+              <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+
+  <span class="cmt"># After all three years upload, create one external table spanning all CSVs.
+  # Use _FILE_NAME pseudo-column in dbt to extract survey_year per row.</span>
+  - <span class="attr">id</span>: <span class="val">create_external_table</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
+    <span class="attr">sql</span>: <span class="val">|
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_stackoverflow_survey`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}survey_*.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );</span>
+
+  - <span class="attr">id</span>: <span class="val">purge_files</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles</span>
+
+<span class="cmt"># Annual schedule — July 1 at 6am PT.
+# Stack Overflow publishes surveys in May/June; July gives buffer for availability.</span>
+<span class="attr">triggers</span>:
+  - <span class="attr">id</span>: <span class="val">annual_survey_ingest</span>
+    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.trigger.Schedule</span>
+    <span class="attr">cron</span>: <span class="val">"0 6 1 7 *"</span>
+    <span class="attr">timezone</span>: <span class="val">America/Los_Angeles</span>
+
+<span class="attr">pluginDefaults</span>:
+  - <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp</span>
+    <span class="attr">values</span>:
+      <span class="attr">serviceAccount</span>: <span class="val">"{{secret('GCP_CREDS')}}"</span>
+      <span class="attr">projectId</span>: <span class="val">"{{kv('GCP_PROJECT_ID')}}"</span>
+      <span class="attr">location</span>: <span class="val">"{{kv('GCP_LOCATION')}}"</span>
+      <span class="attr">bucket</span>: <span class="val">"{{kv('GCP_BUCKET_NAME')}}"</span></code></pre>
+
+                    <p><strong>Running the flows:</strong> In the Kestra UI, paste each YAML (Flows &rarr; Create),
+                        save, then click <strong>Execute</strong>. Run in order: 01 &rarr; 02 &rarr; 03 &rarr; 04.
+                        Monitor each in the <strong>Executions</strong> tab. Green = success. Red = click the failed
+                        task to read its logs.</p>
+                    <div class="sidenote tip">
+                        <div class="nl">&#128161; Troubleshooting common failures &mdash; save this for when something goes red</div>
+                        <strong>Kaggle 401 (authentication failed):</strong> Your <code>SECRET_KAGGLE_API_TOKEN</code>
+                        is wrong or expired. Regenerate at kaggle.com/settings &rarr; API Tokens and re-encode into
+                        <code>kestra/.env_encoded</code>, then restart Kestra (<code>docker compose down &amp;&amp; docker compose up -d</code>).<br><br>
+                        <strong><code>outputFiles</code> key not found:</strong> The Kaggle CLI extracted the file
+                        into a subdirectory (e.g., <code>jobs/job_skills.csv</code> not <code>./job_skills.csv</code>).
+                        Flow 03 includes <code>mv</code> commands after each download to flatten these paths &mdash;
+                        check the shell task logs to confirm the files landed at root level.<br><br>
+                        <strong>GCS 403 (permission denied):</strong> Your service account is missing
+                        <code>Storage Object Creator</code>. Add it in GCP Console &rarr; IAM.<br><br>
+                        <strong>BigQuery 403:</strong> Service account needs <code>BigQuery Data Editor</code> role.<br><br>
+                        <strong>Idempotency &mdash; re-running is safe:</strong> Every Kestra task uses
+                        <code>CREATE OR REPLACE</code>. You can execute any flow multiple times and it will
+                        overwrite, not append. No cleanup needed before re-running.<br><br>
+                        <strong>Retry behavior:</strong> Kestra retries re-execute the <em>entire task</em> from
+                        the beginning &mdash; not from mid-script. A 500MB download that fails at 490MB starts
+                        over. The exponential retry with <code>maxAttempts: 3</code> handles transient network
+                        issues automatically.
+                    </div>
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong> Open BigQuery in GCP
+                            Console. Under <code>frontend_jobs</code> you should see
+                            <code>raw_linkedin_job_postings</code>, <code>raw_job_skills</code>,
+                            <code>raw_job_industries</code>, and <code>raw_stackoverflow_survey</code>. Check row counts
+                            (click a table &rarr; Details tab). If rows exist, Phase 2 is complete.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 3 -->
+            <section class="phase" id="phase3">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 3</div>
+                    <div>
+                        <h2>Data Warehouse &mdash; BigQuery Verification</h2>
+                        <div class="pd">Verify your raw tables are correctly structured and understand the data before writing dbt models. Partition + cluster live on the <strong>mart tables you build in Phase 4</strong>, which earns full <strong>Data Warehouse</strong> rubric points (4/4).</div>
+                        <div class="te">&#9203; Estimated time: 30&ndash;45 min</div>
+                    </div>
+                </div>
+
+                <div class="sidenote">
+                    <div class="nl">&#128161; Why BigQuery specifically, not just Postgres?</div>BigQuery is an OLAP
+                    (Online Analytical Processing) columnar database built for analytics. When you ask "what's the
+                    average applicant count for entry-level jobs?", BigQuery only reads the two relevant columns across
+                    124K rows instead of the entire table. Postgres (OLTP) reads entire rows. At this data scale, that
+                    difference translates to seconds vs minutes and pennies vs dollars in query costs. This is why data
+                    warehouses exist separately from operational databases.
+                </div>
+                <div class="sidenote warning">
+                    <div class="nl">&#9888;&#65039; Watch your bytes &mdash; free tier is real but not infinite</div>
+                    Every query you run in BigQuery shows <strong>Bytes processed</strong> in the bottom panel of the
+                    console. This is your cost signal. At this project&rsquo;s scale you&rsquo;re comfortably inside
+                    the 1TB/month free tier &mdash; but <code>SELECT *</code> on repeated queries burns through it
+                    faster than necessary. During development: <code>SELECT specific_columns LIMIT 100</code> instead
+                    of <code>SELECT *</code>.<br><br>
+                    <strong>External tables (raw SO survey) scan the full CSV on every query</strong> &mdash; there
+                    is no free partition-based pruning on external tables. Once your dbt staging model runs and
+                    materializes <code>stg_stackoverflow_survey</code> as a view, queries go through the mart table
+                    instead, which is more efficient.
+                </div>
+
+                <div class="step" id="p3-verify">
+                    <div class="step-title"><span class="step-num">3.1</span>Verify Raw Tables in BigQuery Console</div>
+                    <p>Open BigQuery in the GCP Console. Navigate to your <code>frontend_jobs</code> dataset and run
+                        these verification queries. <strong>Do this before writing any dbt models</strong> &mdash;
+                        confirming column names now prevents hours of debugging later.</p>
+                    <span class="code-label">BigQuery Console &mdash; run these to understand your data</span>
+                    <pre><code><span class="cmt">-- 1. Row count and date range for LinkedIn 2024</span>
+SELECT
+  COUNT(*)                                   AS total_rows,
+  COUNT(DISTINCT formatted_experience_level) AS seniority_levels,
+  MIN(original_listed_time)                  AS earliest_post,
+  MAX(original_listed_time)                  AS latest_post
+FROM `YOUR_PROJECT.frontend_jobs.raw_linkedin_job_postings`;
+
+<span class="cmt">-- 2. See what seniority values actually exist (important for dbt filters)</span>
+SELECT formatted_experience_level, COUNT(*) AS cnt
+FROM `YOUR_PROJECT.frontend_jobs.raw_linkedin_job_postings`
+GROUP BY 1 ORDER BY 2 DESC;
+
+<span class="cmt">-- 3. Preview a few rows to understand the schema</span>
+SELECT * FROM `YOUR_PROJECT.frontend_jobs.raw_linkedin_job_postings` LIMIT 5;
+
+<span class="cmt">-- 4. Check the job skills table</span>
+SELECT * FROM `YOUR_PROJECT.frontend_jobs.raw_job_skills` LIMIT 5;</code></pre>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Column names may differ from what the guide assumes</div>The
+                        guide uses column names based on the known schemas (<code>original_listed_time</code>,
+                        <code>formatted_experience_level</code>, <code>applies</code>, etc.). Run
+                        <code>SELECT * ... LIMIT 5</code> and look at the actual headers. If any column names differ
+                        from what the dbt models in Phase 4 use, update the model SQL accordingly. This is standard
+                        practice &mdash; always inspect your source data before transforming it.
+                    </div>
+                </div>
+
+                <div class="step" id="p3-partition">
+                    <div class="step-title"><span class="step-num">3.2</span>Understanding Partitioning &amp; Clustering &mdash; Where It Actually Lives</div>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Important &mdash; the raw table has no partition or cluster, and that is correct</div>
+                        Click <code>raw_linkedin_job_postings</code> in the sidebar &rarr; <strong>Details</strong> tab.
+                        You will <strong>not</strong> see "Partitioned by" or "Clustered by" listed. That&rsquo;s intentional.
+                        The raw layer stores data exactly as ingested &mdash; flat and fast to write. Optimization
+                        decisions belong in the transformation layer, where query patterns are known.<br><br>
+                        This is the <strong>Medallion Architecture</strong> principle: Bronze (raw) = no optimization;
+                        Gold (marts) = partition + cluster tuned to actual query shapes. The rubric&rsquo;s
+                        "partitioned + clustered tables" requirement is satisfied by your <strong>dbt mart models in Phase 4</strong>,
+                        not by the raw ingest layer.
+                    </div>
+                    <p>After you run <code>dbt run</code> in Phase 4, <strong>then</strong> open
+                        <code>mart_experience_inflation</code> in BigQuery &rarr; <strong>Details</strong> tab.
+                        You should see:</p>
+                    <ul>
+                        <li><strong>Partitioned by:</strong> <code>posted_date</code> (DAY)</li>
+                        <li><strong>Clustered by:</strong> <code>company_name</code>, <code>location</code></li>
+                    </ul>
+                    <p>Run this query after Phase 4 to prove partition pruning works on the mart &mdash; this is also
+                        the screenshot to include in your README for peer reviewers:</p>
+                    <span class="code-label">BigQuery Console &mdash; run this AFTER dbt run in Phase 4</span>
+                    <pre><code><span class="cmt">-- Confirm partition + cluster metadata on the mart table</span>
+SELECT option_name, option_value
+FROM `YOUR_PROJECT.frontend_jobs.INFORMATION_SCHEMA.TABLE_OPTIONS`
+WHERE table_name = 'mart_experience_inflation';
+
+<span class="cmt">-- Partition pruning test on mart_experience_inflation
+-- "Bytes processed" in the query info panel should be small (only the matching date partition scanned)</span>
+SELECT company_name, total_skill_count, senior_skill_count, inflation_score
+FROM `YOUR_PROJECT.frontend_jobs.mart_experience_inflation`
+WHERE posted_date BETWEEN '2024-01-01' AND '2024-03-31'
+ORDER BY inflation_score DESC
+LIMIT 20;</code></pre>
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; Rubric check &mdash; Data Warehouse (4/4 points)</div>To earn full
+                        marks: &#9989; BigQuery as cloud data warehouse &#9989; Tables loaded from GCS via Kestra
+                        &#9989; Mart tables partitioned by date &#9989; Clustered by meaningful column
+                        &#9989; README explains <em>why</em> these optimization choices were made.<br><br>
+                        That last point is often missed. A peer reviewer wants evidence you understand the reasoning.
+                        Include a screenshot of the mart Details tab <em>and</em> a one-paragraph explanation in your
+                        README (the BigQuery Optimization section in Phase 6 has the template).
+                    </div>
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong> All four raw tables
+                            exist with rows in BigQuery (checked via the verification queries above) and you understand
+                            that partition + cluster will be confirmed on the <em>mart</em> tables after Phase 4.
+                            No files to commit here.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 4 -->
+            <section class="phase" id="phase4">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 4</div>
+                    <div>
+                        <h2>Transformations &mdash; dbt Core</h2>
+                        <div class="pd">Transform raw BigQuery tables into clean, analytics-ready models. This is where
+                            you answer your three research questions. Earns the <strong>Transformations</strong> rubric
+                            points (4/4).</div>
+                        <div class="te">&#9203; Estimated time: 3&ndash;5 hours</div>
+                    </div>
+                </div>
+
+                <div class="sidenote">
+                    <div class="nl">&#128161; What dbt is actually doing</div>dbt lets you write plain SQL
+                    <code>SELECT</code> statements and turns them into tables or views in BigQuery automatically. Each
+                    <code>.sql</code> file in your <code>models/</code> folder is one transformation. You just write the
+                    SELECT &mdash; dbt handles the <code>CREATE TABLE AS</code> part. It also manages build order (model
+                    B depends on model A &rarr; dbt runs A first), runs data quality tests, and generates a visual
+                    lineage diagram of your entire pipeline. This is the analytics engineering workflow you covered in
+                    Week 4.
+                </div>
+
+                <!-- 4.1 INIT -->
+                <div class="step" id="p4-init">
+                    <div class="step-title"><span class="step-num">4.1</span>Initialize dbt &amp; Configure BigQuery
+                        Connection</div>
+                    <span class="code-label">Terminal &mdash; from inside your dbt/ folder</span>
+                    <pre><code>cd dbt
+dbt init frontend_jobs_dbt
+<span class="cmt"># When prompted:
+#   Which database? select bigquery (option 1)
+#   Authentication method? select service-account (option 2)
+#   Service account JSON keyfile path: ~/.gcp/fe-jobs-sa.json
+#   GCP project ID: YOUR-GCP-PROJECT-ID
+#   BigQuery dataset: frontend_jobs
+#   Threads: 4
+#   Job execution timeout: 300
+#   Location: US</span></code></pre>
+                    <p>dbt creates <code>~/.dbt/profiles.yml</code> with your connection. Open and verify it looks like:
+                    </p>
+                    <span class="code-label">~/.dbt/profiles.yml &mdash; NOT in your repo (lives in home dir)</span>
+                    <pre><code><span class="attr">frontend_jobs_dbt</span>:
+  <span class="attr">target</span>: <span class="val">dev</span>
+  <span class="attr">outputs</span>:
+    <span class="attr">dev</span>:
+      <span class="attr">type</span>: <span class="val">bigquery</span>
+      <span class="attr">method</span>: <span class="val">service-account</span>
+      <span class="attr">project</span>: <span class="val">YOUR-GCP-PROJECT-ID</span>
+      <span class="attr">dataset</span>: <span class="val">frontend_jobs</span>
+      <span class="attr">threads</span>: <span class="num">4</span>
+      <span class="attr">keyfile</span>: <span class="val">~/.gcp/fe-jobs-sa.json</span>   <span class="cmt"># path to file — NOT keyfile_json</span>
+      <span class="attr">location</span>: <span class="val">US</span>
+      <span class="attr">timeout_seconds</span>: <span class="num">300</span></code></pre>
+                    <span class="code-label">dbt/frontend_jobs_dbt/profiles.example.yml &mdash; commit this to repo</span>
+                    <pre><code><span class="cmt"># Rename to ~/.dbt/profiles.yml and fill in your values.
+# This file is committed so anyone cloning the repo knows the expected structure.
+# The real profiles.yml lives at ~/.dbt/ (outside the repo) and is NOT committed.</span>
+<span class="attr">frontend_jobs_dbt</span>:
+  <span class="attr">target</span>: <span class="val">dev</span>
+  <span class="attr">outputs</span>:
+    <span class="attr">dev</span>:
+      <span class="attr">type</span>: <span class="val">bigquery</span>
+      <span class="attr">method</span>: <span class="val">service-account</span>
+      <span class="attr">project</span>: <span class="val">your-gcp-project-id</span>
+      <span class="attr">dataset</span>: <span class="val">frontend_jobs</span>
+      <span class="attr">threads</span>: <span class="num">4</span>
+      <span class="attr">keyfile</span>: <span class="val">~/.gcp/fe-jobs-sa.json</span>
+      <span class="attr">location</span>: <span class="val">US</span>
+      <span class="attr">timeout_seconds</span>: <span class="num">300</span></code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why is profiles.yml outside the repo?</div><code>profiles.yml</code>
+                        lives at <code>~/.dbt/</code> (your Mac home directory), deliberately separate from the project
+                        code. Your dbt models in the repo are environment-agnostic SQL &mdash; they don&rsquo;t care if
+                        they run against your BigQuery or someone else&rsquo;s. The profile tells dbt <em>where</em> to
+                        connect. This separation is why someone can clone your repo, set up their own profile, and run
+                        <code>dbt run</code> against their own warehouse without touching your code. It directly
+                        supports your Reproducibility score.
+                    </div>
+                    <span class="code-label">Terminal &mdash; test connection</span>
+                    <pre><code>cd dbt/frontend_jobs_dbt
+dbt debug   <span class="cmt"># should show all green checkmarks for each connection test</span></code></pre>
+                    <p>Now update <code>dbt_project.yml</code> to define materialization per layer:</p>
+                    <span class="code-label">dbt/frontend_jobs_dbt/dbt_project.yml</span>
+                    <pre><code><span class="attr">name</span>: <span class="val">'frontend_jobs_dbt'</span>
+<span class="attr">version</span>: <span class="val">'1.0.0'</span>
+<span class="attr">config-version</span>: <span class="num">2</span>
+<span class="attr">profile</span>: <span class="val">'frontend_jobs_dbt'</span>
+<span class="attr">model-paths</span>: [<span class="val">"models"</span>]
+
+<span class="attr">models</span>:
+  <span class="attr">frontend_jobs_dbt</span>:
+    <span class="attr">staging</span>:
+      <span class="attr">+materialized</span>: <span class="val">view</span>      <span class="cmt"># views = no storage cost, run on demand</span>
+    <span class="attr">intermediate</span>:
+      <span class="attr">+materialized</span>: <span class="val">view</span>
+    <span class="attr">marts</span>:
+      <span class="attr">+materialized</span>: <span class="val">table</span>     <span class="cmt"># tables = stored results, fast dashboard queries</span></code></pre>
+                    <div class="sidenote">
+                        <div class="nl">&#128161; View vs Table &mdash; why stage as views and materialize marts as
+                            tables?</div>A <strong>view</strong> is a saved SQL query &mdash; no stored data, runs fresh
+                        every call. A <strong>table</strong> stores computed results. The strategy: staging and
+                        intermediate models are cheap views (they&rsquo;re just cleaning/joining, accessed rarely). Mart
+                        models are real tables because your Looker Studio dashboard queries them repeatedly &mdash; a
+                        pre-materialized table responds instantly instead of recomputing on every dashboard load. This
+                        is standard dbt architecture documented in the official dbt project structure guide.
+                    </div>
+                </div>
+
+                <!-- 4.2 SOURCES -->
+                <div class="step" id="p4-models">
+                    <div class="step-title"><span class="step-num">4.2</span>Declare Sources &amp; Write All dbt Models
+                    </div>
+                    <p>First, declare your raw BigQuery tables as dbt sources. Create this file so dbt knows where to
+                        find raw data:</p>
+                    <span class="code-label">models/staging/sources.yml</span>
+                    <pre><code><span class="attr">version</span>: <span class="num">2</span>
+
+<span class="attr">sources</span>:
+  - <span class="attr">name</span>: <span class="val">frontend_jobs</span>
+    <span class="attr">database</span>: <span class="val">YOUR-GCP-PROJECT-ID</span>
+    <span class="attr">schema</span>: <span class="val">frontend_jobs</span>
+    <span class="attr">description</span>: <span class="val">"Raw tables loaded by Kestra ingestion pipeline"</span>
+    <span class="cmt"># Source freshness — tells dbt how stale data is acceptable before warning/erroring.
+    # Run with: dbt source freshness
+    # Per dbt docs: loaded_at_field can be a column name or SQL expression returning TIMESTAMP.
+    # original_listed_time is UNIX milliseconds stored as FLOAT64 — cast to INT64 first,
+    # then TIMESTAMP_MILLIS converts to a real TIMESTAMP for dbt freshness comparison.
+    # Annual thresholds because this is a static snapshot dataset, not a live feed.</span>
+    <span class="attr">config</span>:
+      <span class="attr">freshness</span>:
+        <span class="attr">warn_after</span>: {<span class="attr">count</span>: <span class="num">400</span>, <span class="attr">period</span>: <span class="val">day</span>}
+        <span class="attr">error_after</span>: {<span class="attr">count</span>: <span class="num">500</span>, <span class="attr">period</span>: <span class="val">day</span>}
+      <span class="attr">loaded_at_field</span>: <span class="val">"TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64))"</span>
+    <span class="attr">tables</span>:
+      - <span class="attr">name</span>: <span class="val">raw_linkedin_job_postings</span>
+        <span class="attr">description</span>: <span class="val">"124K LinkedIn job postings 2023-2024. Raw flat table, no partition or cluster (optimization lives in dbt mart models)."</span>
+      - <span class="attr">name</span>: <span class="val">raw_job_skills</span>
+        <span class="attr">description</span>: <span class="val">"LinkedIn job skills — job_id to skill_abr mapping."</span>
+        <span class="attr">config</span>:
+          <span class="attr">freshness</span>: <span class="val">null</span>  <span class="cmt"># static lookup table — skip freshness check</span>
+      - <span class="attr">name</span>: <span class="val">raw_job_industries</span>
+        <span class="attr">description</span>: <span class="val">"LinkedIn job industries — job_id to industry_id mapping."</span>
+        <span class="attr">config</span>:
+          <span class="attr">freshness</span>: <span class="val">null</span>  <span class="cmt"># static lookup table — skip freshness check</span>
+      - <span class="attr">name</span>: <span class="val">raw_companies</span>
+        <span class="attr">description</span>: <span class="val">"LinkedIn companies reference table — company_id to company metadata."</span>
+        <span class="attr">config</span>:
+          <span class="attr">freshness</span>: <span class="val">null</span>  <span class="cmt"># static lookup table — skip freshness check</span>
+      - <span class="attr">name</span>: <span class="val">raw_stackoverflow_survey</span>
+        <span class="attr">description</span>: <span class="val">"Stack Overflow Developer Survey 2022-2024. Multi-file external table, one CSV per year."</span>
+        <span class="attr">config</span>:
+          <span class="attr">freshness</span>: <span class="val">null</span>  <span class="cmt"># annual survey — freshness not applicable</span></code></pre>
+
+                    <h3>Staging Layer &mdash; Clean &amp; Standardize Each Source</h3>
+                    <span class="code-label">models/staging/stg_linkedin_jobs.sql</span>
+                    <pre><code><span class="cmt">-- Cleans and standardizes LinkedIn 2024 raw data.
+-- Key jobs done here:
+--   1. Rename columns to consistent names used across all models
+--   2. Parse UNIX millisecond timestamps to real DATE type
+--   3. Flag frontend roles by keyword-matching job titles
+--   4. Normalize seniority labels (LinkedIn uses varied text like "Entry level", "Mid-Senior level")</span>
+
+WITH source AS (
+  SELECT * FROM {{ source('frontend_jobs', 'raw_linkedin_job_postings') }}
+),
+
+cleaned AS (
+  SELECT
+    job_id,
+    company_id,
+    company_name,
+    title                         AS job_title,
+    formatted_experience_level    AS seniority_level,
+    formatted_work_type           AS work_type,
+    remote_allowed                AS is_remote,
+    location,
+    CAST(applies AS INT64)        AS applicant_count,
+    CAST(views AS INT64)          AS listing_views,
+    description                   AS job_description,
+
+    <span class="cmt">-- original_listed_time is UNIX milliseconds as a float (e.g. 1713397508000.0)
+    -- Must CAST to INT64 first before TIMESTAMP_MILLIS conversion</span>
+    DATE(TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64))) AS posted_date,
+    DATE(TIMESTAMP_MILLIS(CAST(CAST(expiry AS FLOAT64) AS INT64)))               AS expiry_date,
+
+    'linkedin_2023_2024'          AS data_source,
+    EXTRACT(YEAR FROM DATE(TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64)))) AS post_year,
+
+    <span class="cmt">-- Frontend role detection: TRUE if job title matches frontend keywords
+    -- Adjust this list after previewing actual data titles from Phase 3</span>
+    CASE WHEN LOWER(title) LIKE ANY (
+      '%frontend%', '%front-end%', '%front end%',
+      '%react%', '%vue%', '%angular%',
+      '%ui engineer%', '%ui developer%',
+      '%web developer%', '%javascript developer%',
+      '%next.js%', '%typescript developer%'
+    ) THEN TRUE ELSE FALSE END    AS is_frontend_role,
+
+    <span class="cmt">-- Normalize seniority labels to 3 clean categories
+    -- LinkedIn uses labels like "Entry level", "Mid-Senior level", "Director" etc.</span>
+    CASE
+      WHEN LOWER(formatted_experience_level) LIKE '%entry%'      THEN 'Entry Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%associate%'  THEN 'Entry Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%internship%' THEN 'Entry Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%mid%'        THEN 'Mid Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%senior%'     THEN 'Senior Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%director%'   THEN 'Senior Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%executive%'  THEN 'Senior Level'
+      WHEN LOWER(formatted_experience_level) LIKE '%lead%'       THEN 'Senior Level'
+      ELSE 'Unknown'
+    END                           AS seniority_category
+
+  FROM source
+  WHERE title IS NOT NULL
+    AND formatted_experience_level IS NOT NULL
+)
+
+SELECT * FROM cleaned</code></pre>
+
+                    <span class="code-label">models/staging/stg_job_skills.sql</span>
+                    <pre><code><span class="cmt">-- Cleans the LinkedIn job_skills supplementary table.
+-- Links job_id to skills for use in experience inflation analysis (Q2).
+-- job_skills.csv has one row per (job_id, skill_abr) pair -- not comma or semicolon-separated.</span>
+
+WITH source AS (
+  SELECT * FROM {{ source('frontend_jobs', 'raw_job_skills') }}
+)
+
+SELECT
+  job_id,
+  skill_abr                    AS skill_id
+FROM source
+WHERE job_id IS NOT NULL
+  AND skill_abr IS NOT NULL</code></pre>
+
+                    <span class="code-label">models/staging/stg_stackoverflow_survey.sql</span>
+                    <pre><code><span class="cmt">-- Extracts AI tool adoption signals from Stack Overflow surveys 2022-2024.
+-- Used as context layer for Question 1 (AI adoption trends as context for seniority distribution).
+-- Note: AI-specific columns (AISelect, AIToolCurrently) only appear in 2023+.
+-- 2022 doesn't have these columns so they'll be NULL for that year.</span>
+
+WITH source AS (
+  SELECT * FROM {{ source('frontend_jobs', 'raw_stackoverflow_survey') }}
+),
+
+filtered AS (
+  SELECT
+    ResponseId,
+    Country,
+    YearsCodePro,
+    MainBranch,
+    LanguageHaveWorkedWith,
+    WebframeHaveWorkedWith,
+
+    <span class="cmt">-- AI columns present in 2023 and 2024 only</span>
+    AISelect        AS ai_use_currently,
+    AISent          AS ai_sentiment,
+    `AIToolCurrently Using` AS ai_tools_used,
+
+    <span class="cmt">-- Extract year from the source file path (GCS wildcard loaded all 3 years)
+    -- The _FILE_NAME pseudo-column in BigQuery external tables holds the GCS path</span>
+    CAST(
+      REGEXP_EXTRACT(_FILE_NAME, r'survey_(\d{4})\.csv')
+    AS INT64)       AS survey_year
+
+  FROM source
+  WHERE MainBranch = 'I am a developer by profession'
+)
+
+SELECT * FROM filtered
+WHERE survey_year IS NOT NULL</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; What is _FILE_NAME and why does it work here?</div>
+                        <code>_FILE_NAME</code> is a <strong>BigQuery pseudo-column</strong> available on all
+                        external tables. It contains the full GCS URI of the file that contributed each row &mdash;
+                        for example: <code>gs://fe-jobs-lake-dw/raw/stackoverflow_survey/survey_2023.csv</code>.
+                        It&rsquo;s not a column in the CSV itself; BigQuery injects it automatically.<br><br>
+                        The <code>REGEXP_EXTRACT(_FILE_NAME, r'survey_(\d{4})\.csv')</code> pulls the
+                        4-digit year from that path, giving every row a <code>survey_year</code> column even
+                        though the CSV files don&rsquo;t contain a year column. This is the standard pattern for
+                        partitioned external table ingestion.
+                        <a href="https://cloud.google.com/bigquery/docs/external-data-cloud-storage#pseudo_columns"
+                            target="_blank">BigQuery external table pseudo-columns docs &rarr;</a>
+                    </div>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; SO survey schema shifts across years &mdash; verify before dbt run</div>
+                        When BigQuery creates a wildcard external table from <code>survey_*.csv</code>, it
+                        auto-detects schema by sampling all three files. If columns present in 2023/2024
+                        (like <code>AISelect</code>, <code>AISent</code>, <code>AIToolCurrently Using</code>)
+                        are absent in 2022, BigQuery may omit them from the schema entirely &mdash; causing
+                        <code>dbt run</code> on <code>stg_stackoverflow_survey</code> to error with
+                        "column not found".<br><br>
+                        <strong>If that happens:</strong> run the <code>CREATE OR REPLACE EXTERNAL TABLE</code>
+                        SQL from flow 04 manually in BigQuery Console (without <code>skip_leading_rows</code>)
+                        and inspect the inferred schema. Wrap any missing AI columns in
+                        <code>IF('column_name' IN UNNEST(column_names), column_name, NULL)</code> or use
+                        <code>SAFE.column_name</code> syntax. 2022 rows will naturally have NULL for AI fields.
+                    </div>
+
+                    <h3>Intermediate Layer &mdash; Unify the Two Job Datasets</h3>
+                    <span class="code-label">models/intermediate/int_jobs_unified.sql</span>
+                    <pre><code><span class="cmt">-- Enriches LinkedIn job postings with skill counts from stg_job_skills.
+-- This is the single source of truth for all mart models.
+-- Industries join is an optional extension (raw_job_industries is available if needed).</span>
+
+WITH jobs AS (
+  SELECT * FROM {{ ref('stg_linkedin_jobs') }}
+),
+
+skills AS (
+  SELECT
+    job_id,
+    COUNT(*)          AS skill_count
+  FROM {{ ref('stg_job_skills') }}
+  GROUP BY 1
+)
+
+SELECT
+  j.*,
+  COALESCE(s.skill_count, 0) AS skill_count,
+
+  <span class="cmt">-- Listing duration: days the job was listed before expiry.
+  -- Uses expiry_date - posted_date so ghost detection works on a historical snapshot.
+  -- CURRENT_DATE() would make every 2023-2024 posting appear 700+ days old.
+  -- Rows without expiry_date will have NULL here (filtered in mart_ghost_postings).</span>
+  DATE_DIFF(j.expiry_date, j.posted_date, DAY) AS days_listed
+
+FROM jobs j
+LEFT JOIN skills s USING (job_id)
+WHERE j.posted_date IS NOT NULL</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why {{ ref() }} instead of a table name?</div>
+                        <code>{{ ref('stg_linkedin_jobs') }}</code> is dbt&rsquo;s way of referencing another model. dbt
+                        resolves it to the real BigQuery table name AND builds a dependency graph &mdash; it
+                        automatically knows to run <code>stg_linkedin_jobs</code> before <code>int_jobs_unified</code>.
+                        If you hard-coded a table name like <code>`project.dataset.stg_linkedin_jobs`</code>, dbt
+                        can&rsquo;t see that dependency and might run models in the wrong order. The <code>ref()</code>
+                        function is what makes dbt pipelines reliable and self-documenting.
+                    </div>
+
+                    <h3>Mart Layer &mdash; Final Analytics Tables (One Per Research Question)</h3>
+                    <span class="code-label">models/marts/mart_seniority_trends.sql &mdash; answers Question 1</span>
+                    <pre><code><span class="cmt">-- QUESTION 1: What is the seniority distribution in frontend job postings?
+-- Aggregates frontend job postings by year and seniority category.
+-- Calculates pct_of_total so you can see relative seniority distribution.
+--
+-- No partition — this is a small aggregated table (a few hundred rows max).
+-- Per Google BigQuery docs, tables under 64MB see negligible benefit from partitioning.
+-- Cluster by seniority_category: queries GROUP BY / filter on this in every Looker tile.
+-- Materialized as table — marts are always tables, never views.</span>
+
+<span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
+{{- config(
+    materialized='table',
+    cluster_by=['seniority_category', 'data_source']
+) -}}
+
+WITH jobs AS (
+  SELECT * FROM {{ ref('int_jobs_unified') }}
+  WHERE is_frontend_role = TRUE
+    AND seniority_category != 'Unknown'
+),
+
+yearly_totals AS (
+  SELECT post_year, COUNT(*) AS total_frontend_jobs
+  FROM jobs GROUP BY 1
+),
+
+by_seniority AS (
+  SELECT post_year, seniority_category, data_source, COUNT(*) AS job_count
+  FROM jobs GROUP BY 1, 2, 3
+)
+
+SELECT
+  s.post_year,
+  s.seniority_category,
+  s.data_source,
+  s.job_count,
+  t.total_frontend_jobs,
+  ROUND(s.job_count / t.total_frontend_jobs * 100, 2) AS pct_of_total
+FROM by_seniority s
+JOIN yearly_totals t USING (post_year)
+ORDER BY post_year, seniority_category</code></pre>
+
+                    <span class="code-label">models/marts/mart_experience_inflation.sql &mdash; answers Question
+                        2</span>
+                    <pre><code><span class="cmt">-- QUESTION 2: Are entry-level postings requiring senior-level skills?
+-- "Experience inflation" = entry-level job title + demanding skill requirements.
+-- Uses the LinkedIn skills table joined back to postings by job_id.
+--
+-- Partition by posted_date: date range filters are common in analysis queries.
+-- Cluster by seniority_category, is_frontend_role: almost all filters use these.
+-- Materialized as table — marts are always tables, never views.</span>
+
+<span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
+{{- config(
+    materialized='table',
+    partition_by={
+      'field': 'posted_date',
+      'data_type': 'date'
+    },
+    cluster_by=['company_name', 'location']
+) -}}
+
+WITH entry_jobs AS (
+  SELECT * FROM {{ ref('stg_linkedin_jobs') }}
+  WHERE is_frontend_role = TRUE
+    AND seniority_category = 'Entry Level'
+),
+
+job_skills AS (
+  SELECT * FROM {{ ref('stg_job_skills') }}
+),
+
+skills_analysis AS (
+  SELECT
+    j.job_id,
+    j.job_title,
+    j.company_name,
+    j.posted_date,
+    j.applicant_count,
+    j.location,
+    COUNT(s.skill_id)            AS total_skill_count,
+
+    <span class="cmt">-- Count skills that signal senior/complex work in an entry-level posting</span>
+    COUNTIF(LOWER(s.skill_id) IN (
+      'system design', 'aws', 'gcp', 'azure', 'kubernetes',
+      'docker', 'ci/cd', 'microservices', 'architecture',
+      'leadership', 'terraform', 'kafka'
+    ))                           AS senior_skill_count,
+
+    <span class="cmt">-- Inflation score: what % of required skills are senior-level?
+    -- High score = entry job that expects senior knowledge</span>
+    ROUND(
+      COUNTIF(LOWER(s.skill_id) IN (
+        'system design', 'aws', 'gcp', 'azure', 'kubernetes',
+        'docker', 'ci/cd', 'microservices', 'architecture',
+        'leadership', 'terraform', 'kafka'
+      )) / NULLIF(COUNT(s.skill_id), 0) * 100, 2
+    )                            AS inflation_score
+
+  FROM entry_jobs j
+  LEFT JOIN job_skills s USING (job_id)
+  GROUP BY 1,2,3,4,5,6
+)
+
+SELECT * FROM skills_analysis
+ORDER BY inflation_score DESC NULLS LAST</code></pre>
+
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Validate skill_abr values before running this mart</div>
+                        The <code>COUNTIF(LOWER(s.skill_id) IN ('aws', 'kubernetes', ...))</code> list assumes
+                        <code>skill_abr</code> values are readable lowercase strings. In reality, they can be
+                        short codes or mixed-case (e.g., <code>JAVA</code>, <code>AWSEC2</code>,
+                        <code>LNKDNADS</code>). If the list doesn&rsquo;t match the actual values, every row
+                        will show <code>senior_skill_count = 0</code> and the Q2 analysis will be meaningless
+                        even though the model runs without errors.<br><br>
+                        <strong>Before finalizing this mart:</strong> run this in BigQuery first:
+                        <pre style="margin-top:8px"><code>SELECT DISTINCT skill_id, COUNT(*) AS freq
+FROM `YOUR_PROJECT.frontend_jobs.stg_job_skills`
+GROUP BY 1
+ORDER BY freq DESC
+LIMIT 50;</code></pre>
+                        Review the top 50 values and update the <code>IN (...)</code> list to match the codes
+                        that actually appear. This is standard exploratory analysis before writing mart logic.
+                    </div>
+
+                    <span class="code-label">models/marts/mart_ghost_postings.sql &mdash; answers Question 3</span>
+                    <pre><code><span class="cmt">-- QUESTION 3: Which companies show ghost posting patterns?
+-- Ghost posting proxy: high applicant count + long listing duration.
+-- Threshold: 100+ applicants AND listed for 60+ days (expiry_date - posted_date) = potential ghost job.
+-- Uses listing_duration from the dataset itself, not CURRENT_DATE(), since this is a
+-- historical snapshot. Rows without expiry_date are excluded (days_listed IS NOT NULL).
+--
+-- No partition — this is a small company-level aggregation table.
+-- Cluster by company_name: Looker bar chart and filters operate on company.
+-- Materialized as table — marts are always tables, never views.</span>
+
+<span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
+{{- config(
+    materialized='table',
+    cluster_by=['company_name']
+) -}}
+
+WITH linkedin_frontend AS (
+  SELECT * FROM {{ ref('int_jobs_unified') }}
+  WHERE data_source = 'linkedin_2023_2024'
+    AND is_frontend_role = TRUE
+    AND applicant_count IS NOT NULL
+    AND days_listed IS NOT NULL
+),
+
+flagged AS (
+  SELECT
+    job_id,
+    job_title,
+    company_name,
+    seniority_category,
+    applicant_count,
+    posted_date,
+    days_listed,
+    location,
+    is_remote,
+
+    CASE
+      WHEN applicant_count >= 100
+       AND days_listed >= 60 THEN TRUE
+      ELSE FALSE
+    END AS is_potential_ghost
+
+  FROM linkedin_frontend
+),
+
+<span class="cmt">-- Aggregate to company level for the dashboard bar chart</span>
+company_summary AS (
+  SELECT
+    company_name,
+    COUNT(*)                          AS total_frontend_postings,
+    COUNTIF(is_potential_ghost)       AS ghost_posting_count,
+    ROUND(COUNTIF(is_potential_ghost) / NULLIF(COUNT(*), 0) * 100, 1) AS ghost_pct,
+    AVG(applicant_count)              AS avg_applicants,
+    AVG(days_listed)                  AS avg_days_listed
+  FROM flagged
+  GROUP BY 1
+  HAVING total_frontend_postings >= 3   <span class="cmt">-- exclude companies with only 1-2 posts</span>
+)
+
+SELECT * FROM company_summary
+ORDER BY ghost_pct DESC</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Ghost postings &mdash; understanding the proxy and its limits</div>
+                        This mart uses a <strong>proxy definition</strong>: 100+ applicants AND listed for 60+ days
+                        before expiry. It identifies <em>suspicious</em> patterns, not proven bad intent.
+                        A legitimate job might have 100 applicants and stay open for months during a slow
+                        hiring process.<br><br>
+                        Two important limitations to document in your README and dashboard:<br>
+                        <strong>1. NULL bias:</strong> The <code>applicant_count IS NOT NULL</code> and
+                        <code>days_listed IS NOT NULL</code> filters exclude all postings where LinkedIn
+                        didn&rsquo;t surface those values. You&rsquo;re only analyzing the subset where both
+                        were visible &mdash; which skews toward more popular or prominently listed jobs.<br>
+                        <strong>2. Survivorship bias:</strong> Only postings that were active long enough
+                        to accumulate applicants appear here. Short-lived legitimate postings are excluded.<br><br>
+                        Acknowledging these limitations in your dashboard actually <em>strengthens</em> your
+                        project &mdash; it shows analytical maturity that peer reviewers and employers value.
+                    </div>
+                </div>
+
+                <!-- 4.3 RUN -->
+                <div class="step" id="p4-run">
+                    <div class="step-title"><span class="step-num">4.3</span>Run, Test &amp; Verify dbt</div>
+                    <span class="code-label">Terminal &mdash; from dbt/frontend_jobs_dbt/</span>
+                    <pre><code><span class="cmt"># Build all models in dependency order</span>
+dbt run
+
+<span class="cmt"># Run a single model only (useful during development)</span>
+dbt run --select stg_linkedin_jobs
+
+<span class="cmt"># Run a model + everything downstream from it</span>
+dbt run --select stg_linkedin_jobs+
+
+<span class="cmt"># Run all tests (add tests to sources.yml to check for nulls, uniqueness, etc.)</span>
+dbt test
+
+<span class="cmt"># Check source freshness (uses loaded_at_field in sources.yml)</span>
+dbt source freshness
+
+<span class="cmt"># Generate docs + open lineage diagram in browser</span>
+dbt docs generate
+dbt docs serve --port 8081   <span class="cmt"># use 8081 — Kestra already runs on 8080</span></code></pre>
+
+                    <h3>Add Data Quality Tests &mdash; <code>schema.yml</code></h3>
+                    <p>Create these two files to give <code>dbt test</code> something to run. Without tests,
+                        <code>dbt test</code> passes vacuously (no tests = no failures, but no validation either).</p>
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Why tests matter &mdash; they protect your analysis</div>
+                        If <code>job_id</code> is not unique in the source data, the <code>LEFT JOIN</code> in
+                        <code>int_jobs_unified</code> silently multiplies rows &mdash; your applicant averages
+                        become inflated and the ghost posting mart shows phantom duplicates. A
+                        <code>unique</code> test on <code>job_id</code> catches this before it reaches Looker
+                        and corrupts your charts. Tests are not bureaucracy &mdash; they&rsquo;re the circuit
+                        breaker between bad source data and wrong conclusions.
+                    </div>
+                    <span class="code-label">models/staging/schema.yml</span>
+                    <pre><code><span class="attr">version</span>: <span class="num">2</span>
+
+<span class="attr">models</span>:
+  - <span class="attr">name</span>: <span class="val">stg_linkedin_jobs</span>
+    <span class="attr">description</span>: <span class="val">"Cleaned and standardized LinkedIn job postings. One row per job."</span>
+    <span class="attr">columns</span>:
+      - <span class="attr">name</span>: <span class="val">job_id</span>
+        <span class="attr">description</span>: <span class="val">"Unique LinkedIn job identifier."</span>
+        <span class="attr">tests</span>:
+          - <span class="val">unique</span>
+          - <span class="val">not_null</span>
+      - <span class="attr">name</span>: <span class="val">posted_date</span>
+        <span class="attr">description</span>: <span class="val">"Date the job was posted (parsed from UNIX ms)."</span>
+        <span class="attr">tests</span>:
+          - <span class="val">not_null</span>
+  - <span class="attr">name</span>: <span class="val">stg_job_skills</span>
+    <span class="attr">description</span>: <span class="val">"One row per (job_id, skill_id) pair."</span>
+    <span class="attr">columns</span>:
+      - <span class="attr">name</span>: <span class="val">job_id</span>
+        <span class="attr">description</span>: <span class="val">"LinkedIn job identifier. Not unique here — one job has many skills."</span>
+        <span class="attr">tests</span>:
+          - <span class="val">not_null</span>
+      - <span class="attr">name</span>: <span class="val">skill_id</span>
+        <span class="attr">description</span>: <span class="val">"Skill abbreviation/code from LinkedIn (e.g. JAVA, AWSEC2)."</span>
+        <span class="attr">tests</span>:
+          - <span class="val">not_null</span></code></pre>
+
+                    <span class="code-label">models/marts/schema.yml</span>
+                    <pre><code><span class="attr">version</span>: <span class="num">2</span>
+
+<span class="attr">models</span>:
+  - <span class="attr">name</span>: <span class="val">mart_seniority_trends</span>
+    <span class="attr">description</span>: <span class="val">"Answers Q1: seniority distribution of frontend job postings by year."</span>
+  - <span class="attr">name</span>: <span class="val">mart_experience_inflation</span>
+    <span class="attr">description</span>: <span class="val">"Answers Q2: entry-level postings with senior-skill inflation score."</span>
+    <span class="attr">columns</span>:
+      - <span class="attr">name</span>: <span class="val">job_id</span>
+        <span class="attr">tests</span>:
+          - <span class="val">unique</span>
+          - <span class="val">not_null</span>
+  - <span class="attr">name</span>: <span class="val">mart_ghost_postings</span>
+    <span class="attr">description</span>: <span class="val">"Answers Q3: company-level ghost posting rates (100+ applicants, 60+ day listing)."</span>
+    <span class="attr">columns</span>:
+      - <span class="attr">name</span>: <span class="val">company_name</span>
+        <span class="attr">tests</span>:
+          - <span class="val">unique</span>
+          - <span class="val">not_null</span></code></pre>
+
+                    <p>After <code>dbt run</code> succeeds, check BigQuery. Under <code>frontend_jobs</code> you should
+                        see:</p>
+                    <ul>
+                        <li><code>mart_seniority_trends</code> &mdash; table with rows (frontend jobs by year +
+                            seniority)</li>
+                        <li><code>mart_experience_inflation</code> &mdash; table (entry-level jobs + skills analysis)
+                        </li>
+                        <li><code>mart_ghost_postings</code> &mdash; table (company ghost posting summary)</li>
+                    </ul>
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; What a clean dbt run looks like</div>
+                        <pre style="margin-top:8px;font-size:11px"><code>Running with dbt=1.9.x
+Found 7 models, 4 sources
+
+1 of 7 START sql view  ... stg_linkedin_jobs       [OK in 1.2s]
+2 of 7 START sql view  ... stg_job_skills           [OK in 0.9s]
+3 of 7 START sql view  ... stg_stackoverflow_survey [OK in 0.8s]
+4 of 7 START sql view  ... int_jobs_unified        [OK in 1.1s]
+5 of 7 START sql table ... mart_seniority_trends   [OK in 8.3s]
+6 of 7 START sql table ... mart_experience_inflation [OK in 12.1s]
+7 of 7 START sql table ... mart_ghost_postings     [OK in 6.7s]
+
+Completed successfully. 7/7 models built.</code></pre>
+                    </div>
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong> <code>dbt run</code> shows
+                            all green AND the three mart tables exist with rows in BigQuery? Commit your entire
+                            <code>dbt/</code> folder to GitHub and move to Phase 5.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 5 -->
+            <section class="phase" id="phase5">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 5</div>
+                    <div>
+                        <h2>Dashboard &mdash; Looker Studio</h2>
+                        <div class="pd">Connect Looker Studio to your BigQuery mart tables and build your dashboard.
+                            Minimum 2 tiles required (1 temporal + 1 categorical) &mdash; you&rsquo;ll build 4. Earns
+                            the <strong>Dashboard</strong> rubric points (4/4).</div>
+                        <div class="te">&#9203; Estimated time: 1.5&ndash;2 hours</div>
+                    </div>
+                </div>
+
+                <div class="sidenote">
+                    <div class="nl">&#128161; Why Looker Studio instead of Streamlit or another tool?</div>Looker Studio
+                    (formerly Google Data Studio) is free, connects natively to BigQuery with zero config, and generates
+                    a shareable public URL &mdash; exactly what peer reviewers need to click and evaluate your project.
+                    It&rsquo;s also genuinely used at GCP-native companies. Streamlit is a great alternative but
+                    requires hosting. Looker Studio gets you to a polished, shareable result fastest given your April 20
+                    deadline.
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">5.1</span>Connect Looker Studio to BigQuery</div>
+                    <ol>
+                        <li>Go to <a href="https://lookerstudio.google.com" target="_blank">lookerstudio.google.com</a>
+                            &mdash; sign in with the same Google account as your GCP project</li>
+                        <li>Click <strong>Create &rarr; Report</strong></li>
+                        <li>In the data source panel, choose <strong>BigQuery</strong></li>
+                        <li>Select: your project &rarr; <code>frontend_jobs</code> dataset &rarr;
+                            <code>mart_seniority_trends</code></li>
+                        <li>Click <strong>Add to Report</strong></li>
+                    </ol>
+                    <p>You can add more data sources later by clicking <strong>Add data</strong> in the toolbar. Each
+                        mart table is a separate data source.</p>
+                    <div class="sidenote warning">
+                        <div class="nl">&#9888;&#65039; Make sure your mart tables have rows before connecting</div>
+                        Looker Studio can connect to empty tables but won&rsquo;t show meaningful charts. Confirm in
+                        BigQuery that each mart has row counts before building tiles. If a mart is empty, re-run that
+                        specific dbt model (<code>dbt run --select mart_ghost_postings</code>) and check for SQL errors.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">5.2</span>Build Your 4 Dashboard Tiles</div>
+                    <p>Build these tiles in order. The first two are the minimum required by the rubric; tiles 3&ndash;4
+                        push you from partial to full points.</p>
+
+                    <div class="questions-block">
+                        <div class="question-card">
+                            <div class="qn">&#128200;</div>
+                            <div>
+                                <div class="qt">Tile 1 &mdash; Entry-Level Share Over Time (Line Chart) &nbsp;<span
+                                        style="font-size:11px;color:var(--green);font-family:'IBM Plex Mono',monospace">REQUIRED
+                                        &mdash; temporal</span></div>
+                                <div class="qnote">Data source: <code>mart_seniority_trends</code> &nbsp;|&nbsp; X-axis:
+                                    <code>post_year</code> &nbsp;|&nbsp; Y-axis: <code>pct_of_total</code> &nbsp;|&nbsp;
+                                    Breakdown dimension: <code>seniority_category</code><br>Shows each seniority
+                                    tier&rsquo;s share over time as separate lines. Viewers should clearly see if
+                                    entry-level % dropped post-2022.</div>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <div class="qn">&#127849;</div>
+                            <div>
+                                <div class="qt">Tile 2 &mdash; 2024 Seniority Distribution (Donut Chart) &nbsp;<span
+                                        style="font-size:11px;color:var(--green);font-family:'IBM Plex Mono',monospace">REQUIRED
+                                        &mdash; categorical</span></div>
+                                <div class="qnote">Data source: <code>mart_seniority_trends</code> filtered to post_year
+                                    = 2024 &nbsp;|&nbsp; Dimension: <code>seniority_category</code> &nbsp;|&nbsp;
+                                    Metric: <code>job_count</code><br>Quick snapshot of where the market stands today.
+                                    Add percentage labels.</div>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <div class="qn">&#128202;</div>
+                            <div>
+                                <div class="qt">Tile 3 &mdash; Top 15 Companies by Ghost Posting Rate (Horizontal Bar)
+                                </div>
+                                <div class="qnote">Data source: <code>mart_ghost_postings</code> &nbsp;|&nbsp; Sort by
+                                    <code>ghost_pct</code> descending &nbsp;|&nbsp; Limit rows to 15<br>Add a filter
+                                    control so viewers can adjust minimum posting count. Label the X-axis clearly as
+                                    &ldquo;% of postings flagged as potential ghost jobs&rdquo;.</div>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <div class="qn">&#128293;</div>
+                            <div>
+                                <div class="qt">Tile 4 &mdash; Scorecard Summary (Key Metrics)</div>
+                                <div class="qnote">Add 2&ndash;3 Scorecard tiles at the top of your dashboard: total
+                                    frontend jobs analyzed, % entry-level in 2024, total companies flagged for ghost
+                                    posting. These give reviewers immediate headline numbers before they dig into the
+                                    charts.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Rubric note on dashboard presentation</div>The rubric explicitly says:
+                        <em>&ldquo;ensure that your graph is easy to understand by adding references and
+                            titles.&rdquo;</em> For each chart: add a descriptive title (not &ldquo;Chart 1&rdquo;),
+                        label your axes, add a legend, and include a brief text box explaining what the viewer is
+                        looking at. A peer reviewer spending 2 minutes on your dashboard should immediately understand
+                        what each tile shows and why it matters. This is the difference between 3/4 and 4/4 on this
+                        category.
+                    </div>
+
+                    <p>When your dashboard is complete: click <strong>Share &rarr; Manage access &rarr; Anyone with the
+                            link &rarr; Viewer</strong>. Copy the URL &mdash; this goes in your README.</p>
+                    <div class="skip-box">&#9197;&#65039; <div><strong>Skip check:</strong> Dashboard has at least 4
+                            tiles, a public link that opens without login, and each chart has a readable title and
+                            labeled axes. Phase 5 is done.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PHASE 6 -->
+            <section class="phase" id="phase6">
+                <div class="phase-header">
+                    <div class="phase-num-badge">Phase 6</div>
+                    <div>
+                        <h2>README &amp; Submission</h2>
+                        <div class="pd">A strong README is the difference between 3/4 and 4/4 on Reproducibility.
+                            It&rsquo;s also what employers see first when visiting your GitHub. Don&rsquo;t rush it.
+                        </div>
+                        <div class="te">&#9203; Estimated time: 1&ndash;1.5 hours</div>
+                    </div>
+                </div>
+
+                <div class="sidenote">
+                    <div class="nl">&#128161; What peer reviewers actually look for &mdash; minimum evidence per rubric category</div>
+                    <ul>
+                        <li><strong>Problem description:</strong> Two paragraphs max &mdash; what problem, why it matters, three specific research questions.</li>
+                        <li><strong>Cloud + IaC:</strong> Screenshot of <code>terraform apply</code> output + GCS bucket in GCP Console.</li>
+                        <li><strong>Data warehouse:</strong> Screenshot of <code>mart_experience_inflation</code> Details tab showing
+                            "Partitioned by: posted_date" and "Clustered by: company_name, location", plus a paragraph explaining <em>why</em> those columns.</li>
+                        <li><strong>Transformations:</strong> Screenshot of dbt docs lineage graph + <code>dbt test</code> passing output.</li>
+                        <li><strong>Dashboard:</strong> Screenshot of 2+ chart types + public Looker Studio URL in README.</li>
+                        <li><strong>Reproducibility:</strong> Someone with a fresh GCP account should be able to follow your README alone. See Step 6.3 below.</li>
+                    </ul>
+                    <a href="https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/projects"
+                        target="_blank">Official DE Zoomcamp rubric and scoring guide &rarr;</a>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">6.1</span>README Structure &amp; Template</div>
+                    <span class="code-label">README.md &mdash; paste this structure and fill in each section</span>
+                    <pre><code><span class="cmt"># Frontend Job Market Analysis Pipeline
+
+## Problem Statement
+The frontend engineering job market has experienced significant shifts in recent years,
+with debates around AI impact and a perceived decline in entry-level opportunities.
+This project builds an end-to-end batch data pipeline analyzing job postings from
+2023-2024 -- examining seniority distribution, experience inflation, and ghost posting
+patterns -- to surface data-driven insights into who's actually hiring frontend
+engineers and what they actually expect.
+
+## Questions Answered
+1. What is the seniority distribution in frontend job postings, and are entry-level roles underrepresented?
+2. Are entry-level postings experiencing "experience inflation" (junior titles + senior-level skills)?
+3. Which companies show ghost posting patterns (high applicants, long-listed, never filled)?
+
+## Architecture
+![Pipeline Architecture](./docs/architecture.png)
+&lt;!-- Create this diagram at draw.io or excalidraw.com and export as PNG --&gt;
+
+| Layer | Tool | Purpose |
+|-------|------|---------|
+| Infrastructure | Terraform | Provisions GCS bucket + BigQuery dataset |
+| Orchestration | Kestra (Docker) | Batch ingestion pipeline |
+| Data Lake | Google Cloud Storage | Raw CSV files |
+| Data Warehouse | BigQuery | Partitioned + clustered mart tables (via dbt) |
+| Transformation | dbt Core | Staging → intermediate → mart models |
+| Dashboard | Looker Studio | Interactive visualizations |
+
+## Data Sources
+- [LinkedIn Job Postings 2023-2024](https://www.kaggle.com/datasets/arshkon/linkedin-job-postings) (Kaggle — 124K postings)
+- [Stack Overflow Developer Survey 2022-2024](https://survey.stackoverflow.co) (public)
+
+## Dashboard
+[View Live Dashboard](YOUR_LOOKER_STUDIO_URL_HERE)
+
+## BigQuery Optimization
+Raw tables are flat (no partition or cluster) for fast ingest. Optimization lives in the
+**dbt mart layer** where query patterns are known (Medallion Architecture: Bronze raw, Gold marts).
+
+- **`mart_experience_inflation`** — partitioned by `posted_date`, clustered by `company_name`, `location`.
+  Date-range queries scan only matching partitions instead of all 124K rows.
+- **`mart_seniority_trends`** — clustered by `seniority_category`, `data_source` (small table;
+  per BigQuery docs, tables under 64MB see negligible benefit from partitioning).
+- **`mart_ghost_postings`** — clustered by `company_name` (optimized for Looker bar chart).
+
+Verify: open `mart_experience_inflation` in BigQuery → Details tab.
+Should show "Partitioned by: posted_date" and "Clustered by: company_name, location".
+
+## How to Reproduce
+
+### Prerequisites
+- GCP account with billing enabled
+- [Terraform](https://developer.hashicorp.com/terraform/install) installed
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed
+- Python 3.12 via pyenv (<code>brew install pyenv</code> then <code>pyenv install 3.12 &amp;&amp; pyenv global 3.12</code>)
+- [Kaggle account](https://www.kaggle.com) and API token (generate at kaggle.com/settings &rarr; API Tokens)
+
+### Steps
+1. Clone this repository
+2. Create a GCP service account with Storage Admin + BigQuery Admin roles, download JSON key
+3. Store key at `~/.gcp/fe-jobs-sa.json`
+4. Copy `terraform/terraform.tfvars.example` to `terraform/terraform.tfvars`, fill in your values
+5. `cd terraform && terraform init && terraform apply`
+6. `cd kestra && docker compose up -d`
+7. In Kestra UI (localhost:8080): run flows in order: 01 → 02 → 03 → 04
+8. `pip3 install "dbt-core>=1.9,<2.0" "dbt-bigquery>=1.9,<2.0"` (requires Python 3.12)
+9. Configure `~/.dbt/profiles.yml` (see `dbt/frontend_jobs_dbt/profiles.example.yml` in the repo for the expected structure)
+10. `cd dbt/frontend_jobs_dbt && dbt run`
+11. Connect Looker Studio to BigQuery marts (see Phase 5 of project guide)</span></code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">&#128161; Add an architecture diagram &mdash; it matters</div>The higher-scoring
+                        example projects almost all included a pipeline diagram. Create one free at <a
+                            href="https://excalidraw.com" target="_blank">excalidraw.com</a> (no account needed) or <a
+                            href="https://draw.io" target="_blank">draw.io</a>. Draw boxes connected by arrows: Kaggle
+                        &rarr; Kestra &rarr; GCS &rarr; BigQuery &rarr; dbt &rarr; Looker Studio. Export as PNG, save to
+                        <code>docs/architecture.png</code>, reference in README. Takes 15 minutes and meaningfully
+                        elevates the project&rsquo;s presentation for peer reviewers.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">6.2</span>Final Pre-Submission Checklist</div>
+                    <ul class="checklist">
+                        <li><span class="check-box" onclick="toggle(this)"></span>Terraform files committed.
+                            <code>terraform.tfvars</code> gitignored. <code>terraform.tfvars.example</code> committed
+                            with placeholder values.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>All 4 Kestra flows in
+                            <code>kestra/flows/</code> and committed to repo.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>All dbt models committed.
+                            <code>dbt run</code> completes cleanly with no errors.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>BigQuery tables are partitioned and
+                            clustered (visible in Table Details tab).</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>Looker Studio dashboard has 4+ tiles
+                            with titles, axis labels, and a public link.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>README has problem statement,
+                            architecture diagram, tech stack table, setup steps.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>README explains <em>WHY</em> tables
+                            are partitioned/clustered (not just that they are).</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>No credentials in repo. Run:
+                            <code>git log --all --full-history -- "*.json"</code> to verify.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>Repository is set to
+                            <strong>Public</strong>.</li>
+                        <li><span class="check-box" onclick="toggle(this)"></span>Submitted before <strong>April 20,
+                                2026</strong>.</li>
+                    </ul>
+                    <div class="sidenote success" style="margin-top:24px">
+                        <div class="nl">&#127881; You built the full modern data engineering stack</div>Infrastructure
+                        as code &rarr; orchestrated batch ingestion &rarr; cloud data lake &rarr; optimized data
+                        warehouse &rarr; layered dbt transformations &rarr; interactive dashboard. That&rsquo;s the
+                        complete pipeline pattern used at real companies &mdash; and now you have the GitHub repo to
+                        prove you built it yourself.
+                    </div>
+                </div>
+
+                <div class="step" id="p6-clean-machine">
+                    <div class="step-title"><span class="step-num">6.3</span>Clean-Machine Reproducibility Walkthrough</div>
+                    <p>The reproducibility category asks whether <em>someone else</em> can run your pipeline from
+                        scratch. Walk through these numbered steps once (or verify each maps to a step in your README)
+                        before submitting. This is the exact sequence a peer reviewer will attempt.</p>
+                    <span class="code-label">End-to-end happy path &mdash; number these steps in your README</span>
+                    <pre><code><span class="cmt"># 1. Clone the repo</span>
+git clone https://github.com/YOUR_USERNAME/data-pipeline-frontend-jobs.git
+cd data-pipeline-frontend-jobs
+
+<span class="cmt"># 2. Place service account key (reviewer creates their own, yours stays local)</span>
+mkdir -p ~/.gcp
+cp YOUR-SERVICE-ACCOUNT-KEY.json ~/.gcp/fe-jobs-sa.json
+
+<span class="cmt"># 3. Provision GCP infrastructure</span>
+cd terraform
+cp terraform.tfvars.example terraform.tfvars   # fill in project_id, dataset, bucket
+terraform init && terraform apply
+
+<span class="cmt"># 4. Configure and start Kestra</span>
+cd ../kestra
+<span class="cmt"># Edit .env_encoded with base64-encoded GCP_SA_KEY and KAGGLE_API_TOKEN</span>
+docker compose up -d
+<span class="cmt"># Open localhost:8080 → Flows → Create → paste each YAML → Execute in order: 01 → 02 → 03 → 04</span>
+
+<span class="cmt"># 5. Install dbt and configure connection</span>
+pip3 install "dbt-core>=1.9,<2.0" "dbt-bigquery>=1.9,<2.0"
+cp dbt/frontend_jobs_dbt/profiles.example.yml ~/.dbt/profiles.yml
+<span class="cmt"># Fill in project, dataset, keyfile path in profiles.yml</span>
+
+<span class="cmt"># 6. Run dbt transformations and tests</span>
+cd dbt/frontend_jobs_dbt
+dbt deps && dbt run && dbt test
+
+<span class="cmt"># 7. Open the dashboard</span>
+<span class="cmt"># Published Looker Studio URL: YOUR_LOOKER_STUDIO_URL_HERE</span></code></pre>
+                    <div class="sidenote success">
+                        <div class="nl">&#9989; Reproducibility rubric checklist</div>
+                        &#9989; README has numbered steps that mirror the above<br>
+                        &#9989; <code>terraform.tfvars.example</code> committed (not <code>terraform.tfvars</code>)<br>
+                        &#9989; <code>dbt/frontend_jobs_dbt/profiles.example.yml</code> committed<br>
+                        &#9989; No secrets, credentials, or <code>*.json</code> files committed<br>
+                        &#9989; <code>.gitignore</code> blocks <code>data/</code>, <code>*.csv</code>, <code>*.json</code><br>
+                        &#9989; dbt version pinned in README or <code>requirements.txt</code>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- BEST PRACTICES SOURCES -->
+            <section class="phase" id="best-practices">
+                <div class="phase-header">
+                    <div class="phase-icon">📚</div>
+                    <div>
+                        <div class="phase-title">Best Practices &amp; Reference Sources</div>
+                        <div class="phase-sub">Primary sources behind every recommendation in this guide</div>
+                    </div>
+                </div>
+
+                <div class="sidenote warning">
+                    <div class="sidenote-title">Why this section exists</div>
+                    Every tool recommendation, architectural decision, and "why" explanation in this guide is backed by
+                    a primary source listed here. A key lesson from this project: partitioning and clustering were
+                    initially placed in the ingestion layer when they belong in the transformation layer. The raw layer
+                    should stay flat and fast to write. Optimization decisions belong where query patterns are known —
+                    in the serving layer. These sources cover that principle and others.
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 1</span>dbt — Project Structure (Staging /
+                        Intermediate / Marts)</div>
+                    <p>The canonical reference for the three-layer dbt architecture used in this project. Explains why
+                        staging models are views, why marts are tables, what intermediate models are for, and the
+                        single-source-of-truth principle.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview"
+                                target="_blank">dbt docs — How we structure our dbt projects (overview)</a></li>
+                        <li><a href="https://docs.getdbt.com/best-practices/how-we-structure/2-staging"
+                                target="_blank">dbt docs — Staging layer (materialized as views, 1-to-1 with
+                                sources)</a></li>
+                        <li><a href="https://docs.getdbt.com/best-practices/how-we-structure/4-marts"
+                                target="_blank">dbt docs — Marts layer (materialized as tables, business entities)</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 2</span>dbt — BigQuery Configurations
+                        (partition_by, cluster_by)</div>
+                    <p>Official reference for the <code>{{ config() }}</code> block syntax used in this project's mart
+                        models. Confirms that partition and cluster belong in dbt model configs, not in raw ingestion
+                        SQL.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://docs.getdbt.com/reference/resource-configs/bigquery-configs"
+                                target="_blank">dbt docs — BigQuery configurations (partition_by, cluster_by,
+                                materialized)</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 3</span>dbt — Source Freshness</div>
+                    <p>Documents the <code>loaded_at_field</code>, <code>warn_after</code>, and <code>error_after</code>
+                        freshness configuration added to <code>sources.yml</code>. Also explains the
+                        <code>dbt source freshness</code> command.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://docs.getdbt.com/reference/resource-properties/freshness"
+                                target="_blank">dbt docs — Source freshness properties</a></li>
+                        <li><a href="https://docs.getdbt.com/docs/build/sources" target="_blank">dbt docs — Add sources
+                                to your DAG</a></li>
+                        <li><a href="https://docs.getdbt.com/reference/commands/source" target="_blank">dbt docs — dbt
+                                source freshness command reference</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 4</span>dbt — ref() Function and DAG</div>
+                    <p>Explains exactly what <code>{{ ref() }}</code> does: interpolates the schema, builds the
+                        dependency graph, and controls build order. The reason hardcoded table names break dbt
+                        pipelines.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://docs.getdbt.com/reference/dbt-jinja-functions/ref" target="_blank">dbt docs
+                                — ref() function reference</a></li>
+                        <li><a href="https://docs.getdbt.com/faqs/Models/create-dependencies" target="_blank">dbt docs —
+                                How to create dependencies between models</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 5</span>dbt — profiles.yml Location</div>
+                    <p>Official documentation confirming <code>profiles.yml</code> belongs at <code>~/.dbt/</code>,
+                        outside the project repo, to keep credentials out of version control. This is the default and
+                        recommended location.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://docs.getdbt.com/docs/core/connect-data-platform/profiles.yml"
+                                target="_blank">dbt docs — About profiles.yml</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 6</span>BigQuery — Partitioning and Clustering
+                    </div>
+                    <p>Google's official documentation on when partitioning and clustering apply, and why tables under
+                        64MB see negligible benefit. This is the source behind removing partition from
+                        <code>mart_seniority_trends</code>.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://cloud.google.com/bigquery/docs/partitioned-tables" target="_blank">Google
+                                Cloud — Introduction to partitioned tables</a></li>
+                        <li><a href="https://cloud.google.com/bigquery/docs/clustered-tables" target="_blank">Google
+                                Cloud — Introduction to clustered tables (64MB threshold)</a></li>
+                        <li><a href="https://cloud.google.com/blog/products/data-analytics/new-bigquery-partitioning-and-clustering-recommendations"
+                                target="_blank">Google Cloud Blog — Partitioning and clustering recommender (>100GB
+                                threshold for partitioning)</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 7</span>BigQuery — Free Tier</div>
+                    <p>Confirms the 1TB/month query free tier and 10GB storage free tier referenced in the guide. These
+                        are permanent free tiers, not trial credits.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://cloud.google.com/bigquery/pricing" target="_blank">Google Cloud — BigQuery
+                                pricing</a></li>
+                        <li><a href="https://cloud.google.com/free" target="_blank">Google Cloud — Free Tier products
+                                and limits</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 8</span>Kestra — Secrets (base64 + SECRET_
+                        prefix)</div>
+                    <p>Confirms the exact mechanics: OSS Kestra reads environment variables prefixed with
+                        <code>SECRET_</code>, base64-decodes their values at runtime, and exposes them via
+                        <code>{{ secret('KEY') }}</code> without the prefix.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://kestra.io/docs/concepts/secret" target="_blank">Kestra docs — Secrets
+                                concepts</a></li>
+                        <li><a href="https://kestra.io/docs/how-to-guides/secrets" target="_blank">Kestra docs —
+                                Configure secrets how-to guide</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 9</span>Medallion Architecture (Bronze / Silver /
+                        Gold)</div>
+                    <p>The clearest articulation of the raw → clean → aggregated layer pattern. Bronze = raw ingest (no
+                        optimization), Silver = cleaned/standardized, Gold = business aggregates with
+                        partitioning/clustering. Maps directly to this project's raw → staging → mart layers.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://www.databricks.com/glossary/medallion-architecture"
+                                target="_blank">Databricks — Medallion Architecture</a></li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title"><span class="step-num">REF 10</span>Fundamentals of Data Engineering — Reis
+                        &amp; Housley (2022)</div>
+                    <p>The most comprehensive book on the data engineering lifecycle. Chapters on transformation and
+                        serving explain why optimization decisions belong late in the pipeline — only after you
+                        understand how data will be used.</p>
+                    <ul style="font-size:13px;margin:8px 0 0 20px;line-height:1.8">
+                        <li><a href="https://www.oreilly.com/library/view/fundamentals-of-data/9781098108298/"
+                                target="_blank">O'Reilly — Fundamentals of Data Engineering (Reis &amp; Housley)</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidenote" style="margin-top:24px">
+                    <div class="sidenote-title">The rule applied to this project</div>
+                    <strong>Raw layer (Kestra → BigQuery):</strong> flat
+                    <code>CREATE OR REPLACE TABLE AS SELECT *</code> — no partition, no cluster. Fast writes, simple
+                    schema.<br><br>
+                    <strong>Mart layer (dbt):</strong> each mart has a <code>&#123;&#123; config() &#125;&#125;</code>
+                    block with cluster (and partition where warranted) based on actual Looker query patterns:
+                    <ul style="margin:8px 0 0 20px;font-size:13px">
+                        <li><code>mart_seniority_trends</code> — cluster only:
+                            <code>seniority_category, data_source</code> (small table, &lt;64MB — partitioning adds no
+                            benefit per Google docs)</li>
+                        <li><code>mart_experience_inflation</code> — partition by <code>posted_date</code>, cluster by
+                            <code>seniority_category, is_frontend_role</code></li>
+                        <li><code>mart_ghost_postings</code> — cluster only: <code>company_name</code> (small aggregated
+                            table)</li>
+                    </ul>
+                </div>
+            </section>
+
+
+
+        </main>
+    </div>
+
+    <script>
+        window.goTo = function (id) {
+            var el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        window.toggle = function (el) {
+            el.classList.toggle('done');
+            el.textContent = el.classList.contains('done') ? '\u2713' : '';
+        };
+
+        // Add copy buttons to all code blocks
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('pre').forEach(function (pre) {
+                var wrap = document.createElement('div');
+                wrap.className = 'code-wrap';
+                pre.parentNode.insertBefore(wrap, pre);
+                wrap.appendChild(pre);
+
+                var btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.textContent = 'Copy';
+                wrap.appendChild(btn);
+
+                btn.addEventListener('click', function () {
+                    var code = pre.querySelector('code');
+                    var text = code ? code.innerText : pre.innerText;
+                    navigator.clipboard.writeText(text).then(function () {
+                        btn.textContent = 'Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function () {
+                            btn.textContent = 'Copy';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(function () {
+                        // Fallback for older browsers
+                        var ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.style.position = 'fixed';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                        btn.textContent = 'Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function () {
+                            btn.textContent = 'Copy';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

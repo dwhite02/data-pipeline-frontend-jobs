@@ -37,7 +37,7 @@ override.tf.json
 terraform.rc
 
 # Ignore index.html file
-index.html
+# index.html
 
 # Credentials — NEVER commit these
 *.json
@@ -65,3 +65,5 @@ terraform/terraform.tfvars
 .DS_Store
 
 .cursor/
+
+.env_encoded
