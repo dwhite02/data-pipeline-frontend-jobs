@@ -1,0 +1,114 @@
+id: 03_ingest_linkedin_supplementary
+namespace: capstone
+description: Downloads supplementary LinkedIn files (job_skills, job_industries, companies). Triggered automatically after 02 succeeds so supplementary files always match the postings version.
+
+variables:
+  dataset_slug: "arshkon/linkedin-job-postings"
+  gcs_prefix: "gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"
+
+tasks:
+  # WorkingDirectory shares filesystem so all three files are accessible to upload tasks
+  - id: ingest_supplementary
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      # Download all three supplementary files in one Docker task
+      - id: download_files
+        type: io.kestra.plugin.scripts.shell.Commands
+        containerImage: python:3.12-slim
+        taskRunner:
+          type: io.kestra.plugin.scripts.runner.docker.Docker
+        outputFiles:
+          - "jobs/job_skills.csv"
+          - "jobs/job_industries.csv"
+          - "companies/companies.csv"
+        # Per Kaggle CLI docs: --unzip works correctly on full dataset downloads.
+        # Downloading the full dataset once is simpler and more reliable than
+        # three separate -f downloads which inconsistently deliver .zip files.
+        # -o forces overwrite if run previously, -q suppresses progress bars.
+        commands:
+          - export KAGGLE_API_TOKEN="{{secret('KAGGLE_API_TOKEN')}}"
+          - pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore
+          - kaggle datasets download {{vars.dataset_slug}} -p . --unzip -o -q
+          - ls -la
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT30S
+          maxInterval: PT5M
+
+      - id: upload_skills
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{outputs.download_files.outputFiles['jobs/job_skills.csv']}}"
+        to: "{{render(vars.gcs_prefix)}}job_skills.csv"
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT10S
+          maxInterval: PT5M
+
+      - id: upload_industries
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{outputs.download_files.outputFiles['jobs/job_industries.csv']}}"
+        to: "{{render(vars.gcs_prefix)}}job_industries.csv"
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT10S
+          maxInterval: PT5M
+
+      - id: upload_companies
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{outputs.download_files.outputFiles['companies/companies.csv']}}"
+        to: "{{render(vars.gcs_prefix)}}companies.csv"
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT10S
+          maxInterval: PT5M
+
+  - id: load_skills_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_job_skills`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}job_skills.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );
+
+  - id: load_industries_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_job_industries`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}job_industries.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+
+# Fires automatically when flow 02 completes successfully.
+# preconditions is the correct Kestra OSS syntax for Flow triggers.
+triggers:
+  - id: after_linkedin_postings
+    type: io.kestra.plugin.core.trigger.Flow
+    preconditions:
+      id: wait_for_postings
+      flows:
+        - namespace: capstone
+          flowId: 02_ingest_linkedin_2024
+          states: [SUCCESS]
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{secret('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"

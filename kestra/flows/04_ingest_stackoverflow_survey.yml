@@ -1,0 +1,64 @@
+id: 04_ingest_stackoverflow_survey
+namespace: capstone
+
+variables:
+  gcs_prefix: "gs://{{kv('GCP_BUCKET_NAME')}}/raw/stackoverflow_survey/"
+
+tasks:
+  - id: ingest_per_year
+    type: io.kestra.plugin.core.flow.ForEach
+    values: ["2022", "2023", "2024"]
+    concurrencyLimit: 1
+    tasks:
+      - id: process_year
+        type: io.kestra.plugin.core.flow.WorkingDirectory
+        tasks:
+          - id: download_extract
+            type: io.kestra.plugin.scripts.shell.Commands
+            containerImage: python:3.12-slim
+            taskRunner:
+              type: io.kestra.plugin.scripts.runner.docker.Docker
+            outputFiles:
+              - "survey_*.csv"
+            commands:
+              - apt-get update && apt-get install -y curl
+              - curl -fSL "https://survey.stackoverflow.co/datasets/stack-overflow-developer-survey-{{taskrun.value}}.zip" -o survey_{{taskrun.value}}.zip
+              - python3 -c "import zipfile; zipfile.ZipFile('survey_{{taskrun.value}}.zip').extract('survey_results_public.csv', '.')"
+              - mv survey_results_public.csv survey_{{taskrun.value}}.csv
+              - test -f survey_{{taskrun.value}}.csv || { echo 'CSV missing'; exit 1; }
+              - rm survey_{{taskrun.value}}.zip
+              - echo "{{taskrun.value}} rows $(wc -l < survey_{{taskrun.value}}.csv)"
+
+          - id: upload_to_gcs
+            type: io.kestra.plugin.gcp.gcs.Upload
+            from: "{{ currentEachOutput(outputs.download_extract).outputFiles['survey_' ~ taskrun.value ~ '.csv'] }}"
+            to: "{{ render(vars.gcs_prefix) }}survey_{{taskrun.value}}.csv"
+
+  - id: create_external_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    sql: |
+      CREATE OR REPLACE EXTERNAL TABLE
+        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_stackoverflow_survey`
+      OPTIONS (
+        format = 'CSV',
+        uris = ['{{render(vars.gcs_prefix)}}survey_*.csv'],
+        skip_leading_rows = 1,
+        ignore_unknown_values = TRUE
+      );
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+
+triggers:
+  - id: annual_survey_ingest
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 6 1 7 *"
+    timezone: America/Los_Angeles
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{secret('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"
