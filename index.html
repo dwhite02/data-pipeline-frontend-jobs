@@ -1634,91 +1634,97 @@ ls -la kestra/.env_encoded</code></pre>
                         file extensions &mdash; the guide uses <code>.yaml</code> in prose but the repo files use
                         <code>.yml</code>. Pick one and stay consistent.</p>
 
-                    <span class="code-label">kestra/flows/02_ingest_linkedin_2024.yaml</span>
-                    <pre><code><span class="attr">id</span>: <span class="val">02_ingest_linkedin_2024</span>
-<span class="attr">namespace</span>: <span class="val">capstone</span>
-<span class="attr">description</span>: <span class="val">Downloads 124K LinkedIn job postings from Kaggle, uploads to GCS, loads a flat raw BigQuery table (no partition/cluster &mdash; optimization lives in dbt mart models). Flow 03 chains automatically after SUCCESS.</span>
+                    <span class="code-label">kestra/flows/02_ingest_linkedin_2024.yml</span>
+                    <pre><code>id: 02_ingest_linkedin_2024
+namespace: capstone
 
-<span class="attr">variables</span>:
-  <span class="attr">dataset_slug</span>: <span class="val">"arshkon/linkedin-job-postings"</span>
-  <span class="attr">gcs_prefix</span>: <span class="val">"gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"</span>
+description: >
+  Downloads LinkedIn job postings from Kaggle, uploads to GCS,
+  and loads into a raw BigQuery table using a tolerant BigQuery load job from GCS.
+  No partitioning/clustering — handled downstream in dbt.
 
-<span class="attr">tasks</span>:
-  <span class="cmt"># WorkingDirectory shares filesystem between download and upload tasks</span>
-  - <span class="attr">id</span>: <span class="val">ingest</span>
-    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.flow.WorkingDirectory</span>
-    <span class="attr">tasks</span>:
-      <span class="cmt"># STEP 1: Download postings.csv from Kaggle using -f flag (single file, ~500MB)</span>
-      - <span class="attr">id</span>: <span class="val">download_postings</span>
-        <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.shell.Commands</span>
-        <span class="attr">containerImage</span>: <span class="val">python:3.12-slim</span>
-        <span class="attr">taskRunner</span>:
-          <span class="attr">type</span>: <span class="val">io.kestra.plugin.scripts.runner.docker.Docker</span>
-        <span class="attr">outputFiles</span>:
-          - <span class="val">"*.csv"</span>
-        <span class="attr">commands</span>:
-          - <span class="val">pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore</span>
-          - <span class="val">KAGGLE_API_TOKEN={{secret('KAGGLE_API_TOKEN')}} kaggle datasets download {{vars.dataset_slug}} -f postings.csv -p . --unzip</span>
-          - <span class="val">ls -lh *.csv</span>
-        <span class="attr">retry</span>:
-          <span class="attr">type</span>: <span class="val">exponential</span>
-          <span class="attr">maxAttempts</span>: <span class="num">3</span>
-          <span class="attr">interval</span>: <span class="val">PT30S</span>
-          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+variables:
+  dataset_slug: "arshkon/linkedin-job-postings"
+  gcs_prefix: "gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"
 
-      <span class="cmt"># STEP 2: Upload postings.csv to GCS data lake</span>
-      - <span class="attr">id</span>: <span class="val">upload_postings</span>
-        <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.gcs.Upload</span>
-        <span class="attr">from</span>: <span class="val">"{{outputs.download_postings.outputFiles['postings.csv']}}"</span>
-        <span class="attr">to</span>: <span class="val">"{{render(vars.gcs_prefix)}}postings.csv"</span>
-        <span class="attr">retry</span>:
-          <span class="attr">type</span>: <span class="val">exponential</span>
-          <span class="attr">maxAttempts</span>: <span class="num">3</span>
-          <span class="attr">interval</span>: <span class="val">PT10S</span>
-          <span class="attr">maxInterval</span>: <span class="val">PT5M</span>
+tasks:
+  # STEP 1 + 2: Download + Upload (shared WorkingDirectory)
+  - id: ingest
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: download_postings
+        type: io.kestra.plugin.scripts.shell.Commands
+        containerImage: python:3.12-slim
+        taskRunner:
+          type: io.kestra.plugin.scripts.runner.docker.Docker
+        # Whole-dataset unzip leaves postings.csv at cwd; explicit name avoids glob collection edge cases.
+        outputFiles:
+          - postings.csv
+        commands:
+          - export KAGGLE_API_TOKEN="{{secret('KAGGLE_API_TOKEN')}}"
+          - test -n "$KAGGLE_API_TOKEN" || { echo "ERROR KAGGLE_API_TOKEN is empty"; exit 1; }
+          - pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore
+          - kaggle datasets download {{vars.dataset_slug}} -p . --unzip
+          - test -f postings.csv || { echo "postings.csv missing after unzip; ls:"; ls -la; exit 1; }
+          - ls -lh postings.csv
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT30S
+          maxInterval: PT5M
 
-  <span class="cmt"># STEP 3: Create external table pointing at GCS</span>
-  - <span class="attr">id</span>: <span class="val">create_external_table</span>
-    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
-    <span class="attr">sql</span>: <span class="val">|
-      CREATE OR REPLACE EXTERNAL TABLE
-        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.linkedin_job_postings_ext`
-      OPTIONS (
-        format = 'CSV',
-        uris = ['{{render(vars.gcs_prefix)}}postings.csv'],
-        skip_leading_rows = 1,
-        ignore_unknown_values = TRUE
-      );</span>
+      - id: upload_postings
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{outputs.download_postings.outputFiles['postings.csv']}}"
+        to: "{{render(vars.gcs_prefix)}}postings.csv"
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT10S
+          maxInterval: PT5M
 
-  <span class="cmt"># STEP 4: Load raw table — flat copy, no partition or cluster.
-  # Partitioning and clustering belong in dbt mart models where
-  # query patterns are known. Raw layer stays simple and fast to write.</span>
-  - <span class="attr">id</span>: <span class="val">load_raw_table</span>
-    <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp.bigquery.Query</span>
-    <span class="attr">sql</span>: <span class="val">|
-      CREATE OR REPLACE TABLE
-        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_linkedin_job_postings`
-      AS SELECT * FROM
-        `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.linkedin_job_postings_ext`;</span>
+  # STEP 3: BigQuery load job from GCS (use LoadFromGcs — Load only accepts Kestra internal storage URIs)
+  - id: load_raw_table
+    type: io.kestra.plugin.gcp.bigquery.LoadFromGcs
+    from:
+      - "{{render(vars.gcs_prefix)}}postings.csv"
+    destinationTable: "{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_linkedin_job_postings"
+    format: CSV
+    writeDisposition: WRITE_TRUNCATE
+    autodetect: true
+    ignoreUnknownValues: true
+    maxBadRecords: 1000
+    csvOptions:
+      skipLeadingRows: 1
+      allowQuotedNewLines: true
 
-  - <span class="attr">id</span>: <span class="val">purge_files</span>
-    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles</span>
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
 
-<span class="cmt"># Annual schedule — Jan 1 at 6am PT. Dataset refreshes roughly yearly.
-# Flow trigger on 03 chains automatically after this succeeds.</span>
-<span class="attr">triggers</span>:
-  - <span class="attr">id</span>: <span class="val">annual_ingest</span>
-    <span class="attr">type</span>: <span class="val">io.kestra.plugin.core.trigger.Schedule</span>
-    <span class="attr">cron</span>: <span class="val">"0 6 1 1 *"</span>
-    <span class="attr">timezone</span>: <span class="val">America/Los_Angeles</span>
+triggers:
+  - id: annual_ingest
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 6 1 1 *"
+    timezone: America/Los_Angeles
 
-<span class="attr">pluginDefaults</span>:
-  - <span class="attr">type</span>: <span class="val">io.kestra.plugin.gcp</span>
-    <span class="attr">values</span>:
-      <span class="attr">serviceAccount</span>: <span class="val">"{{secret('GCP_CREDS')}}"</span>
-      <span class="attr">projectId</span>: <span class="val">"{{kv('GCP_PROJECT_ID')}}"</span>
-      <span class="attr">location</span>: <span class="val">"{{kv('GCP_LOCATION')}}"</span>
-      <span class="attr">bucket</span>: <span class="val">"{{kv('GCP_BUCKET_NAME')}}"</span></code></pre>
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{secret('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"
+</code></pre>
+
+                    <div class="sidenote">
+                        <div class="nl">Why <code>LoadFromGcs</code> instead of an external table + <code>CREATE TABLE AS SELECT</code>?</div>
+                        LinkedIn <code>postings.csv</code> has long text fields (job descriptions) with quoted newlines.
+                        BigQuery external tables over CSV often fail with <em>Missing close quote</em> on scan. A
+                        <strong>BigQuery load job</strong> from GCS with <code>allowQuotedNewLines: true</code> handles
+                        this reliably. Use <code>io.kestra.plugin.gcp.bigquery.LoadFromGcs</code> for <code>gs://</code>
+                        URIs &mdash; <code>io.kestra.plugin.gcp.bigquery.Load</code> is only for files already in
+                        Kestra internal storage (<a href="https://www.kestra.io/plugins/plugin-gcp/bigquery/io.kestra.plugin.gcp.bigquery.Load" target="_blank">docs</a>).
+                    </div>
 
                     <div class="sidenote warning">
                         <div class="nl">&#9888;&#65039; Verify CSV filenames before running</div>The filenames above

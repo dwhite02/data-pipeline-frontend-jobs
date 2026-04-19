@@ -1,0 +1,79 @@
+id: 02_ingest_linkedin_2024
+namespace: capstone
+
+description: >
+  Downloads LinkedIn job postings from Kaggle, uploads to GCS,
+  and loads into a raw BigQuery table using a tolerant BigQuery load job from GCS.
+  No partitioning/clustering — handled downstream in dbt.
+
+variables:
+  dataset_slug: "arshkon/linkedin-job-postings"
+  gcs_prefix: "gs://{{kv('GCP_BUCKET_NAME')}}/raw/linkedin_2023_2024/"
+
+tasks:
+  # STEP 1 + 2: Download + Upload (shared WorkingDirectory)
+  - id: ingest
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: download_postings
+        type: io.kestra.plugin.scripts.shell.Commands
+        containerImage: python:3.12-slim
+        taskRunner:
+          type: io.kestra.plugin.scripts.runner.docker.Docker
+        # Whole-dataset unzip leaves postings.csv at cwd; explicit name avoids glob collection edge cases.
+        outputFiles:
+          - postings.csv
+        commands:
+          - export KAGGLE_API_TOKEN="{{secret('KAGGLE_API_TOKEN')}}"
+          - test -n "$KAGGLE_API_TOKEN" || { echo "ERROR KAGGLE_API_TOKEN is empty"; exit 1; }
+          - pip install kaggle --upgrade --no-cache-dir -q --root-user-action=ignore
+          - kaggle datasets download {{vars.dataset_slug}} -p . --unzip
+          - test -f postings.csv || { echo "postings.csv missing after unzip; ls:"; ls -la; exit 1; }
+          - ls -lh postings.csv
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT30S
+          maxInterval: PT5M
+
+      - id: upload_postings
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{outputs.download_postings.outputFiles['postings.csv']}}"
+        to: "{{render(vars.gcs_prefix)}}postings.csv"
+        retry:
+          type: exponential
+          maxAttempts: 3
+          interval: PT10S
+          maxInterval: PT5M
+
+  # STEP 3: BigQuery load job from GCS (use LoadFromGcs — Load only accepts Kestra internal storage URIs)
+  - id: load_raw_table
+    type: io.kestra.plugin.gcp.bigquery.LoadFromGcs
+    from:
+      - "{{render(vars.gcs_prefix)}}postings.csv"
+    destinationTable: "{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.raw_linkedin_job_postings"
+    format: CSV
+    writeDisposition: WRITE_TRUNCATE
+    autodetect: true
+    ignoreUnknownValues: true
+    maxBadRecords: 1000
+    csvOptions:
+      skipLeadingRows: 1
+      allowQuotedNewLines: true
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+
+triggers:
+  - id: annual_ingest
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 6 1 1 *"
+    timezone: America/Los_Angeles
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{secret('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"

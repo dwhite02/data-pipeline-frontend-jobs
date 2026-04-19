@@ -1,0 +1,23 @@
+id: 01_setup_gcp_kv
+namespace: capstone
+tasks:
+  - id: project_id
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_PROJECT_ID
+    kvType: STRING
+    value: YOUR-PROJECT-ID   # replace
+  - id: location
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_LOCATION
+    kvType: STRING
+    value: US-CENTRAL1
+  - id: bucket
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_BUCKET_NAME
+    kvType: STRING
+    value: fe-jobs-lake-yourname  # must match your Terraform bucket name exactly
+  - id: dataset
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_DATASET
+    kvType: STRING
+    value: frontend_jobs
