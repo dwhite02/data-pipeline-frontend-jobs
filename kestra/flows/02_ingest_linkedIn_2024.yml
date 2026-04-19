@@ -46,7 +46,7 @@ tasks:
           interval: PT10S
           maxInterval: PT5M
 
-  # STEP 3: BigQuery load job from GCS (use LoadFromGcs — Load only accepts Kestra internal storage URIs)
+  # STEP 3: Load job from GCS (not external table + CTAS). csvOptions allow quoted newlines for job descriptions.
   - id: load_raw_table
     type: io.kestra.plugin.gcp.bigquery.LoadFromGcs
     from:
@@ -60,6 +60,10 @@ tasks:
     csvOptions:
       skipLeadingRows: 1
       allowQuotedNewLines: true
+      encoding: UTF-8
+      allowJaggedRows: true
+      fieldDelimiter: ","
+      quote: '"'
 
   - id: purge_files
     type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
