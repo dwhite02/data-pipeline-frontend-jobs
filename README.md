@@ -37,6 +37,7 @@ Millions of people try to break into tech every year — bootcamp graduates, new
 
 ## Architecture
 
+![Architecture](./docs/architecture.png)
 ```
 Kaggle Datasets (LinkedIn + Stack Overflow)
         │
