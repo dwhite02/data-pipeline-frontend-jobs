@@ -20,7 +20,7 @@ SELECT
   -- NULL here means the job_id has no rows in stg_job_skills.
   -- The posting exists but LinkedIn didn't surface skills for it.
   -- COALESCE(x, 0) prevents those jobs from being silently dropped by mart aggregations.
-  -- Jobs with skill_count = 0 are included in Q2 but will have inflation_score = NULL.
+  -- Jobs with skill_count = 0 are included in Q2 but will have avg_applicants = NULL.
 
   -- Listing duration: days between posted and expiry dates.
   -- Use expiry_date - posted_date (NOT CURRENT_DATE) because this is a historical snapshot.

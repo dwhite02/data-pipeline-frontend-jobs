@@ -4,7 +4,7 @@
 --
 -- Partition by posted_date: date range filters are common in analysis queries.
 -- Cluster by company_name, location: Looker bar charts and detail views filter/group on these.
--- seniority_category and is_frontend_role are WHERE-clause constants in this mart,
+-- seniority_category and is_tech_role are WHERE-clause constants in this mart,
 -- so clustering on them adds no pruning benefit.
 -- Materialized as table — marts are always tables, never views.
 
@@ -14,11 +14,11 @@
     cluster_by=['company_name']
 ) }}
 
--- QUESTION 2: Entry-level frontend job landscape.
+-- QUESTION 2: Entry-level tech job landscape.
 -- skill_abr values are industry codes (IT, ENG etc), not specific tech skills,
--- so experience inflation via skill matching is not reliable with this dataset.
+-- so skill-based experience inflation analysis is not reliable with this dataset.
 -- Instead: surface genuinely useful entry-level signals:
---   - Which companies post the most entry-level frontend roles?
+--   - Which companies post the most entry-level tech roles?
 --   - How competitive are entry-level roles (applicant counts)?
 --   - Remote vs onsite split for entry-level?
 --   - How long are entry-level roles listed before expiry?
@@ -26,20 +26,13 @@
 WITH entry_jobs AS (
   SELECT
     job_id,
-    job_title,
     company_name,
-    posted_date,
-    expiry_date,
     location,
     is_remote,
     applicant_count,
-    listing_views,
-    days_listed,
-    seniority_category,
-    seniority_level,
-    work_type
+    days_listed
   FROM {{ ref('int_jobs_unified') }}
-  WHERE is_frontend_role = TRUE
+  WHERE is_tech_role = TRUE
     AND seniority_category = 'Entry Level'
     AND posted_date IS NOT NULL
 ),

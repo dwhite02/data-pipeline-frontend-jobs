@@ -1,5 +1,5 @@
--- QUESTION 1: What is the seniority distribution in frontend job postings?
--- Aggregates frontend job postings by year and seniority category.
+-- QUESTION 1: What is the seniority distribution in tech job postings?
+-- Aggregates tech job postings by year and seniority category.
 -- Calculates pct_of_total so you can see relative seniority distribution.
 --
 -- No partition — this is a small aggregated table (a few hundred rows max).
@@ -19,7 +19,7 @@
 -- pct_of_total gives relative distribution for the donut chart (Tile 2).
 WITH jobs AS (
   SELECT * FROM {{ ref('int_jobs_unified') }}
-  WHERE is_frontend_role = TRUE
+  WHERE is_tech_role = TRUE
     AND seniority_category != 'Unknown'
     AND posted_date IS NOT NULL
 ),

@@ -1,5 +1,5 @@
 -- Cleans the LinkedIn job_skills supplementary table.
--- Links job_id to skills for use in experience inflation analysis (Q2).
+-- Links job_id to skills for use in entry-level competition analysis (Q2).
 -- Skills are stored as semicolon-separated strings per job_id.
 
 WITH source AS (
