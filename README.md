@@ -172,7 +172,7 @@ models/
 ### Step 1 — Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/data-pipeline-tech-jobs.git
+git clone https://github.com/dwhite02/data-pipeline-tech-jobs
 cd data-pipeline-tech-jobs
 ```
 
