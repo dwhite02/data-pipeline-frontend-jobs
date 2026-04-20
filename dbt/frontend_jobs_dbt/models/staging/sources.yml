@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: frontend_jobs
+    database: fe-jobs-pipeline
+    schema: frontend_jobs
+    description: "Raw tables loaded by Kestra ingestion pipeline"
+    # Source freshness — tells dbt how stale data is acceptable before warning/erroring.
+    # Run with: dbt source freshness
+    # Per dbt docs: loaded_at_field must point to a TIMESTAMP or DATE column.
+    # original_listed_time is UNIX milliseconds — use listed_time which is also UNIX ms.
+    # We set annual thresholds because this is a static snapshot dataset, not live data.
+    config:
+      freshness:
+        warn_after: {count: 400, period: day}
+        error_after: {count: 500, period: day}
+      loaded_at_field: "TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64))"
+    tables:
+      - name: raw_linkedin_job_postings
+        description: "123,849 LinkedIn job postings 2023-2024. Raw flat table, no partition or cluster (optimization lives in dbt mart models)."
+      - name: raw_job_skills
+        description: "LinkedIn job skills — job_id to skill_abr mapping."
+        config:
+          freshness: null  # static lookup table — skip freshness check
+      - name: raw_job_industries
+        description: "LinkedIn job industries — job_id to industry_id mapping."
+        config:
+          freshness: null  # static lookup table — skip freshness check
+      - name: raw_stackoverflow_survey
+        description: "Stack Overflow Developer Survey 2022-2024. Multi-file external table, one CSV per year."
+        config:
+          freshness: null  # annual survey — freshness not applicable
