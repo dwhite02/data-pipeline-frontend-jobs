@@ -13,28 +13,39 @@
     cluster_by=['seniority_category', 'data_source']
 ) }}
 
+-- Dataset covers Dec 2023 – Apr 2024 (one year of LinkedIn data).
+-- post_year alone is useless for trend analysis with one year.
+-- posted_date enables monthly time series in Looker Studio (Tile 1).
+-- pct_of_total gives relative distribution for the donut chart (Tile 2).
 WITH jobs AS (
   SELECT * FROM {{ ref('int_jobs_unified') }}
   WHERE is_frontend_role = TRUE
     AND seniority_category != 'Unknown'
+    AND posted_date IS NOT NULL
 ),
 
-yearly_totals AS (
-  SELECT post_year, COUNT(*) AS total_frontend_jobs
-  FROM jobs GROUP BY 1
+overall_total AS (
+  SELECT COUNT(*) AS total_frontend_jobs FROM jobs
 ),
 
 by_seniority AS (
-  SELECT post_year, seniority_category, data_source, COUNT(*) AS job_count
-  FROM jobs GROUP BY 1, 2, 3
+  SELECT
+    posted_date,
+    post_year,
+    seniority_category,
+    data_source,
+    COUNT(*) AS job_count
+  FROM jobs
+  GROUP BY 1, 2, 3, 4
 )
 
 SELECT
+  s.posted_date,
   s.post_year,
   s.seniority_category,
   s.data_source,
   s.job_count,
   t.total_frontend_jobs,
-  ROUND(s.job_count / t.total_frontend_jobs * 100, 2) AS pct_of_total
+  ROUND(s.job_count / t.total_frontend_jobs * 100, 4) AS pct_of_total
 FROM by_seniority s
-JOIN yearly_totals t USING (post_year)
+CROSS JOIN overall_total t

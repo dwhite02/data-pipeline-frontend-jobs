@@ -11,52 +11,56 @@
 -- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.
 {{ config(
     materialized='table',
-    partition_by={
-      'field': 'posted_date',
-      'data_type': 'date'
-    },
-    cluster_by=['company_name', 'location']
+    cluster_by=['company_name']
 ) }}
 
+-- QUESTION 2: Entry-level frontend job landscape.
+-- skill_abr values are industry codes (IT, ENG etc), not specific tech skills,
+-- so experience inflation via skill matching is not reliable with this dataset.
+-- Instead: surface genuinely useful entry-level signals:
+--   - Which companies post the most entry-level frontend roles?
+--   - How competitive are entry-level roles (applicant counts)?
+--   - Remote vs onsite split for entry-level?
+--   - How long are entry-level roles listed before expiry?
+-- These are real insights this dataset can support.
 WITH entry_jobs AS (
-  SELECT * FROM {{ ref('stg_linkedin_jobs') }}
+  SELECT
+    job_id,
+    job_title,
+    company_name,
+    posted_date,
+    expiry_date,
+    location,
+    is_remote,
+    applicant_count,
+    listing_views,
+    days_listed,
+    seniority_category,
+    seniority_level,
+    work_type
+  FROM {{ ref('int_jobs_unified') }}
   WHERE is_frontend_role = TRUE
     AND seniority_category = 'Entry Level'
+    AND posted_date IS NOT NULL
 ),
 
-job_skills AS (
-  SELECT * FROM {{ ref('stg_job_skills') }}
-),
-
-skills_analysis AS (
+company_summary AS (
   SELECT
-    j.job_id,
-    j.job_title,
-    j.company_name,
-    j.posted_date,
-    j.applicant_count,
-    j.location,
-    COUNT(s.skill_id)            AS total_skill_count,
-
-    -- Count skills that signal senior/complex work in an entry-level posting
-    -- skill_abr values are LinkedIn industry category codes, not specific tech names.
-    -- Top codes from actual data: IT (Info Tech), ENG (Engineering),
-    -- PRJM (Project Mgmt), MGMT (Management), ANLS (Analysis).
-    -- Using these as senior-signal codes: entry-level postings requiring
-    -- Engineering + IT + Project Mgmt skills signal above-entry scope.
-    COUNTIF(s.skill_id IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
-                                 AS senior_skill_count,
-
-    -- Inflation score: what % of required skills are senior-level?
-    -- High score = entry job that expects senior knowledge
+    company_name,
+    COUNT(*)                              AS entry_level_postings,
+    ROUND(AVG(applicant_count), 1)        AS avg_applicants,
+    ROUND(AVG(days_listed), 1)            AS avg_days_listed,
+    COUNTIF(is_remote = TRUE)             AS remote_count,
+    COUNTIF(is_remote = FALSE
+            OR is_remote IS NULL)         AS onsite_count,
     ROUND(
-      COUNTIF(s.skill_id IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
-      / NULLIF(COUNT(s.skill_id), 0) * 100, 2
-    )                            AS inflation_score
-
-  FROM entry_jobs j
-  LEFT JOIN job_skills s USING (job_id)
-  GROUP BY 1,2,3,4,5,6
+      COUNTIF(is_remote = TRUE)
+      / NULLIF(COUNT(*), 0) * 100, 1
+    )                                     AS remote_pct
+  FROM entry_jobs
+  WHERE applicant_count IS NOT NULL
+  GROUP BY 1
+  HAVING entry_level_postings >= 2
 )
 
-SELECT * FROM skills_analysis
+SELECT * FROM company_summary
