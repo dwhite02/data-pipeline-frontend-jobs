@@ -1018,20 +1018,22 @@
                     <span class="code-label">Terminal &mdash; clone and scaffold</span>
                     <pre><code>git clone https://github.com/YOUR_USERNAME/frontend-jobs-pipeline.git
 cd frontend-jobs-pipeline
-mkdir -p terraform kestra/flows dbt/models/staging dbt/models/intermediate dbt/models/marts data</code></pre>
+mkdir -p terraform kestra/flows dbt/frontend_jobs_dbt/models/staging dbt/frontend_jobs_dbt/models/intermediate dbt/frontend_jobs_dbt/models/marts data</code></pre>
                     <div class="file-tree">
                         <span class="dir">frontend-jobs-pipeline/</span><br>
                         &#9500;&#9472;&#9472; <span class="dir">terraform/</span> <span class="comment"># IaC &mdash;
                             provisions GCS + BigQuery</span><br>
                         &#9500;&#9472;&#9472; <span class="dir">kestra/flows/</span> <span class="comment"># YAML
                             pipeline flows</span><br>
-                        &#9500;&#9472;&#9472; <span class="dir">dbt/models/</span><br>
-                        &#9474; &#9500;&#9472;&#9472; <span class="dir">staging/</span> <span class="comment"># raw
-                            &rarr; cleaned</span><br>
-                        &#9474; &#9500;&#9472;&#9472; <span class="dir">intermediate/</span> <span class="comment">#
-                            joining datasets</span><br>
-                        &#9474; &#9492;&#9472;&#9472; <span class="dir">marts/</span> <span class="comment"># final
-                            analytics tables</span><br>
+                        &#9500;&#9472;&#9472; <span class="dir">dbt/</span><br>
+                        &#9474; &#9492;&#9472;&#9472; <span class="dir">frontend_jobs_dbt/</span> <span
+                            class="comment"># dbt project root &mdash; dbt_project.yml lives here</span><br>
+                        &#9474; &#9500;&#9472;&#9472; <span class="dir">models/staging/</span> <span class="comment">#
+                            raw &rarr; cleaned views</span><br>
+                        &#9474; &#9500;&#9472;&#9472; <span class="dir">models/intermediate/</span> <span
+                            class="comment"># joining datasets</span><br>
+                        &#9474; &#9492;&#9472;&#9472; <span class="dir">models/marts/</span> <span class="comment">#
+                            final analytics tables</span><br>
                         &#9500;&#9472;&#9472; <span class="dir">data/</span> <span class="comment"># local staging
                             (gitignored)</span><br>
                         &#9492;&#9472;&#9472; README.md
@@ -2183,7 +2185,7 @@ dbt debug   <span class="cmt"># should show all green checkmarks for each connec
                     </div>
                     <p>First, declare your raw BigQuery tables as dbt sources. Create this file so dbt knows where to
                         find raw data:</p>
-                    <span class="code-label">models/staging/sources.yml</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/staging/sources.yml</span>
                     <pre><code><span class="attr">version</span>: <span class="num">2</span>
 
 <span class="attr">sources</span>:
@@ -2200,7 +2202,7 @@ dbt debug   <span class="cmt"># should show all green checkmarks for each connec
       <span class="attr">freshness</span>:
         <span class="attr">warn_after</span>: {<span class="attr">count</span>: <span class="num">400</span>, <span class="attr">period</span>: <span class="val">day</span>}
         <span class="attr">error_after</span>: {<span class="attr">count</span>: <span class="num">500</span>, <span class="attr">period</span>: <span class="val">day</span>}
-      <span class="attr">loaded_at_field</span>: <span class="val">"DATE(TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64)))"</span>
+      <span class="attr">loaded_at_field</span>: <span class="val">"TIMESTAMP_MILLIS(CAST(CAST(original_listed_time AS FLOAT64) AS INT64))"</span>
     <span class="attr">tables</span>:
       - <span class="attr">name</span>: <span class="val">raw_linkedin_job_postings</span>
         <span class="attr">description</span>: <span class="val">"123,849 LinkedIn job postings 2023-2024. Raw flat table, no partition or cluster (optimization lives in dbt mart models)."</span>
@@ -2218,7 +2220,7 @@ dbt debug   <span class="cmt"># should show all green checkmarks for each connec
           <span class="attr">freshness</span>: <span class="val">null</span>  <span class="cmt"># annual survey — freshness not applicable</span></code></pre>
 
                     <h3>Staging Layer &mdash; Clean &amp; Standardize Each Source</h3>
-                    <span class="code-label">models/staging/stg_linkedin_jobs.sql</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/staging/stg_linkedin_jobs.sql</span>
                     <pre><code><span class="cmt">-- Cleans and standardizes LinkedIn 2024 raw data.
 -- Key jobs done here:
 --   1. Rename columns to consistent names used across all models
@@ -2238,7 +2240,7 @@ cleaned AS (
     title                         AS job_title,
     formatted_experience_level    AS seniority_level,
     formatted_work_type           AS work_type,
-    CAST(remote_allowed AS BOOL)  AS is_remote,  -- raw is FLOAT (0.0/1.0) not BOOLEAN
+    CAST(CAST(remote_allowed AS INT64) AS BOOL) AS is_remote,  -- FLOAT64 needs INT64 intermediate cast
     location,
     CAST(applies AS INT64)        AS applicant_count,
     CAST(views AS INT64)          AS listing_views,
@@ -2274,12 +2276,16 @@ cleaned AS (
     -- 'Entry level' (36,708 rows), 'Mid-Senior level' (41,489), 'Associate' (9,826)
     -- 'Director' (3,746), 'Internship' (1,449), 'Executive' (1,222)
     -- 29,409 rows have empty string — these fall to 'Unknown' and are excluded from marts.</span>
+    <span class="cmt">-- Exact values confirmed from actual data:
+    -- 'Entry level' (36,708), 'Mid-Senior level' (41,489), 'Associate' (9,826)
+    -- 'Director' (3,746), 'Internship' (1,449), 'Executive' (1,222)
+    -- 'Senior level' does NOT exist in this dataset — omitted from CASE
+    -- Empty string (29,409 rows) → 'Unknown' → filtered out in marts</span>
     CASE formatted_experience_level
       WHEN 'Entry level'       THEN 'Entry Level'
       WHEN 'Associate'         THEN 'Entry Level'
       WHEN 'Internship'        THEN 'Entry Level'
       WHEN 'Mid-Senior level'  THEN 'Mid Level'
-      WHEN 'Senior level'      THEN 'Senior Level'
       WHEN 'Director'          THEN 'Senior Level'
       WHEN 'Executive'         THEN 'Senior Level'
       ELSE 'Unknown'
@@ -2292,7 +2298,7 @@ cleaned AS (
 
 SELECT * FROM cleaned</code></pre>
 
-                    <span class="code-label">models/staging/stg_job_skills.sql</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/staging/stg_job_skills.sql</span>
                     <pre><code><span class="cmt">-- Cleans the LinkedIn job_skills supplementary table.
 -- Links job_id to skills for use in experience inflation analysis (Q2).
 -- Skills are stored as semicolon-separated strings per job_id.</span>
@@ -2308,11 +2314,11 @@ FROM source
 WHERE job_id IS NOT NULL
   AND skill_abr IS NOT NULL</code></pre>
 
-                    <span class="code-label">models/staging/stg_stackoverflow_survey.sql</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/staging/stg_stackoverflow_survey.sql</span>
                     <pre><code><span class="cmt">-- Extracts AI tool adoption signals from Stack Overflow surveys 2022-2024.
 -- Used as context layer for Question 1 (AI correlation with entry-level decline).
--- Note: AI-specific columns (AISelect, AIToolCurrently) only appear in 2023+.
--- 2022 doesn't have these columns so they'll be NULL for that year.</span>
+-- Columns AISelect, AISent, AIToolCurrently_Using confirmed present across all years.
+-- _FILE_NAME pseudo-column removed — does not propagate through dbt source layer.</span>
 
 WITH source AS (
   SELECT * FROM {{ source('frontend_jobs', 'raw_stackoverflow_survey') }}
@@ -2327,26 +2333,20 @@ filtered AS (
     LanguageHaveWorkedWith,
     WebframeHaveWorkedWith,
 
-    <span class="cmt">-- AI columns present in 2023 and 2024 only</span>
+    <span class="cmt">-- AI columns confirmed present in all three survey years
+    -- AIToolCurrently_Using confirmed as BigQuery column name (spaces → underscores)</span>
     AISelect                  AS ai_use_currently,
     AISent                    AS ai_sentiment,
-    AIToolCurrently_Using     AS ai_tools_used,
-
-    <span class="cmt">-- Extract year from the source file path (GCS wildcard loaded all 3 years)
-    -- The _FILE_NAME pseudo-column in BigQuery external tables holds the GCS path</span>
-    CAST(
-      REGEXP_EXTRACT(_FILE_NAME, r'survey_(\d{4})\.csv')
-    AS INT64)       AS survey_year
+    AIToolCurrently_Using     AS ai_tools_used
 
   FROM source
   WHERE MainBranch = 'I am a developer by profession'
 )
 
-SELECT * FROM filtered
-WHERE survey_year IS NOT NULL</code></pre>
+SELECT * FROM filtered</code></pre>
 
                     <h3>Intermediate Layer &mdash; Unify the Two Job Datasets</h3>
-                    <span class="code-label">models/intermediate/int_jobs_unified.sql</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/intermediate/int_jobs_unified.sql</span>
                     <pre><code><span class="cmt">-- Enriches LinkedIn job postings with skills and industry data.
 -- This is the single source of truth for all mart models.
 -- Joins postings → skills → industries for full picture per job.</span>
@@ -2393,7 +2393,8 @@ WHERE j.posted_date IS NOT NULL</code></pre>
                     </div>
 
                     <h3>Mart Layer &mdash; Final Analytics Tables (One Per Research Question)</h3>
-                    <span class="code-label">models/marts/mart_seniority_trends.sql &mdash; answers Question 1</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/marts/mart_seniority_trends.sql &mdash;
+                        answers Question 1</span>
                     <pre><code><span class="cmt">-- QUESTION 1: What is the seniority distribution in frontend job postings?
 -- Aggregates frontend job postings by year and seniority category.
 -- Calculates pct_of_total so you can see relative seniority distribution.
@@ -2404,10 +2405,10 @@ WHERE j.posted_date IS NOT NULL</code></pre>
 -- Materialized as table — marts are always tables, never views.</span>
 
 <span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
-{{- config(
+{{ config(
     materialized='table',
     cluster_by=['seniority_category', 'data_source']
-) -}}
+) }}
 
 WITH jobs AS (
   SELECT * FROM {{ ref('int_jobs_unified') }}
@@ -2436,8 +2437,8 @@ FROM by_seniority s
 JOIN yearly_totals t USING (post_year)
 ORDER BY post_year, seniority_category</code></pre>
 
-                    <span class="code-label">models/marts/mart_experience_inflation.sql &mdash; answers Question
-                        2</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/marts/mart_experience_inflation.sql &mdash;
+                        answers Question 2</span>
                     <pre><code><span class="cmt">-- QUESTION 2: Are entry-level postings requiring senior-level skills?
 -- "Experience inflation" = entry-level job title + demanding skill requirements.
 -- Uses the LinkedIn skills table joined back to postings by job_id.
@@ -2449,14 +2450,14 @@ ORDER BY post_year, seniority_category</code></pre>
 -- Materialized as table — marts are always tables, never views.</span>
 
 <span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
-{{- config(
+{{ config(
     materialized='table',
     partition_by={
       'field': 'posted_date',
       'data_type': 'date'
     },
     cluster_by=['company_name', 'location']
-) -}}
+) }}
 
 WITH entry_jobs AS (
   SELECT * FROM {{ ref('stg_linkedin_jobs') }}
@@ -2476,7 +2477,7 @@ skills_analysis AS (
     j.posted_date,
     j.applicant_count,
     j.location,
-    COUNT(s.skill_abr)           AS total_skill_count,
+    COUNT(s.skill_id)            AS total_skill_count,
 
     <span class="cmt">-- Count skills that signal senior/complex work in an entry-level posting</span>
     <span class="cmt">-- skill_abr values are LinkedIn industry category codes, not specific tech names.
@@ -2484,14 +2485,14 @@ skills_analysis AS (
     -- PRJM (Project Mgmt), MGMT (Management), ANLS (Analysis).
     -- Using these as senior-signal codes: entry-level postings requiring
     -- Engineering + IT + Project Mgmt skills signal above-entry scope.</span>
-    COUNTIF(s.skill_abr IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
+    COUNTIF(s.skill_id IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
                                  AS senior_skill_count,
 
     <span class="cmt">-- Inflation score: what % of required skills are senior-level?
     -- High score = entry job that expects senior knowledge</span>
     ROUND(
-      COUNTIF(s.skill_abr IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
-      / NULLIF(COUNT(s.skill_abr), 0) * 100, 2
+      COUNTIF(s.skill_id IN ('ENG', 'IT', 'PRJM', 'MGMT', 'ANLS'))
+      / NULLIF(COUNT(s.skill_id), 0) * 100, 2
     )                            AS inflation_score
 
   FROM entry_jobs j
@@ -2516,7 +2517,8 @@ ORDER BY inflation_score DESC NULLS LAST</code></pre>
                         proxy definition in your README and dashboard.
                     </div>
 
-                    <span class="code-label">models/marts/mart_ghost_postings.sql &mdash; answers Question 3</span>
+                    <span class="code-label">dbt/frontend_jobs_dbt/models/marts/mart_ghost_postings.sql &mdash; answers
+                        Question 3</span>
                     <pre><code><span class="cmt">-- QUESTION 3: Which companies show ghost posting patterns?
 -- Ghost posting proxy: high applicant count + long listing duration.
 -- Threshold: 100+ applicants AND 60+ days since posted = potential ghost job.
@@ -2526,10 +2528,10 @@ ORDER BY inflation_score DESC NULLS LAST</code></pre>
 -- Materialized as table — marts are always tables, never views.</span>
 
 <span class="cmt">-- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.</span>
-{{- config(
+{{ config(
     materialized='table',
     cluster_by=['company_name']
-) -}}
+) }}
 
 WITH linkedin_frontend AS (
   SELECT * FROM {{ ref('int_jobs_unified') }}
