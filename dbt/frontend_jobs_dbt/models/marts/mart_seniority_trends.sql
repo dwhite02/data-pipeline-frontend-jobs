@@ -10,6 +10,10 @@
 -- dbt config: partition + cluster defined HERE in the mart, not in raw ingestion.
 {{ config(
     materialized='table',
+    partition_by={
+      'field': 'posted_date',
+      'data_type': 'date'
+    },
     cluster_by=['seniority_category', 'data_source']
 ) }}
 
